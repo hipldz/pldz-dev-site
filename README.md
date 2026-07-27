@@ -187,6 +187,7 @@ DEPLOY_GITHUB_TOKEN=github_pat_xxx
 DEPLOY_MAX_ARTIFACT_BYTES=104857600
 DEPLOY_HTTP_PROXY=
 DEPLOY_HTTPS_PROXY=
+CACHE_API_TOKEN=change-me
 ```
 
 后端启动时会调用 `ProjectConfig.load_env()`：
@@ -338,6 +339,12 @@ prefix = /api/v1/resource
 | `POST` | `/cache/download` | 管理员 | `{ filename }` | 文件下载     |
 | `POST` | `/cache/delete`   | 管理员 | `{ filename }` | `true/false` |
 | `POST` | `/cache/upload`   | 管理员 | multipart file | `true/false` |
+| `GET`  | `/cache/files/{filename}` | `X-Cache-Token` | 无 | 流式下载缓存文件 |
+| `PUT`  | `/cache/files/{filename}` | `X-Cache-Token` | 原始文件请求体 | 流式、原子上传缓存文件 |
+
+自动化程序调用 `/cache/files/{filename}` 时不需要登录 Cookie，但必须携带
+`X-Cache-Token: <CACHE_API_TOKEN>`；令牌由服务器 `.env` 的 `CACHE_API_TOKEN` 配置。
+原有 `/cache/upload`、`/cache/download` 管理接口仍使用管理员登录认证。
 
 协议文件来源：
 

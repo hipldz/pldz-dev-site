@@ -27,6 +27,21 @@ def test_cache_upload_requires_login(client):
     )
 
 
+def test_cache_file_get_requires_machine_token(client):
+    assert client.get("/api/v1/resource/cache/files/x.txt").status_code == 403
+
+
+def test_cache_file_put_requires_machine_token(client):
+    assert (
+        client.put(
+            "/api/v1/resource/cache/files/x.txt",
+            content=b"hello",
+            headers={"content-length": "5"},
+        ).status_code
+        == 403
+    )
+
+
 def test_livedemo_set_requires_login(client):
     assert_requires_login(client.post("/api/v1/website/livedemo/set", json={"data": []}))
 

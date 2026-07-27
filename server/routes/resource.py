@@ -1,10 +1,12 @@
 import os
+import secrets
 from pydantic import BaseModel
-from fastapi import APIRouter, HTTPException, File, UploadFile, Depends, status
+from fastapi import APIRouter, HTTPException, File, Header, Request, UploadFile, Depends, status
 from fastapi.responses import HTMLResponse, FileResponse
 
 from core import ProjectConfig, Logger
 from scripts.filesystem import CacheCrudHandle
+from scripts.filesystem.cache.cache_crud import MAX_CACHE_FILE_BYTES
 from scripts.db import AuthorizedHandler
 from .dependencies import ensure_admin_user
 from .path_utils import resolve_safe_file_path
@@ -146,6 +148,40 @@ class CacheDataRequest(BaseModel):
     filename: str
 
 
+def _cache_file_response(filename: str) -> FileResponse:
+    file_path = CacheCrudHandle.get_cache_file(filename)
+    if not file_path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Cache file '{filename}' not found.",
+        )
+    return FileResponse(file_path, media_type="application/octet-stream", filename=filename)
+
+
+def _parse_content_length(request: Request) -> int:
+    try:
+        content_length = int(request.headers.get("content-length", ""))
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_411_LENGTH_REQUIRED, detail="Content-Length is required.") from error
+    if content_length < 0:
+        raise HTTPException(status_code=status.HTTP_411_LENGTH_REQUIRED, detail="Content-Length is required.")
+    if content_length > MAX_CACHE_FILE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Cache file exceeds the {MAX_CACHE_FILE_BYTES // 1024 // 1024} MB limit.",
+        )
+    return content_length
+
+
+def _check_cache_token(cache_token: str) -> None:
+    expected = os.environ.get("CACHE_API_TOKEN", "").strip()
+    if not expected or not secrets.compare_digest(cache_token.strip(), expected):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid cache API token.",
+        )
+
+
 @RESOURCE_ROUTE.post('/cache/download')
 async def api_download_cache_file(request: CacheDataRequest, user: dict = Depends(AuthorizedHandler.get_current_user)):
     """
@@ -164,14 +200,38 @@ async def api_download_cache_file(request: CacheDataRequest, user: dict = Depend
             detail="Filename must be provided."
         )
 
-    file_path = CacheCrudHandle.get_cache_file(filename)
-    if not os.path.exists(file_path):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Cache file '{filename}' not found."
-        )
+    return _cache_file_response(filename)
 
-    return FileResponse(file_path, media_type='application/octet-stream', filename=filename)
+
+@RESOURCE_ROUTE.get('/cache/files/{filename}')
+async def api_get_cache_file(
+    filename: str,
+    x_cache_token: str = Header("", alias="X-Cache-Token"),
+):
+    """使用机器令牌流式下载指定缓存文件。"""
+    _check_cache_token(x_cache_token)
+    return _cache_file_response(filename)
+
+
+@RESOURCE_ROUTE.put('/cache/files/{filename}')
+async def api_put_cache_file(
+    filename: str,
+    request: Request,
+    x_cache_token: str = Header("", alias="X-Cache-Token"),
+):
+    """使用机器令牌以原始请求体流式上传缓存文件。"""
+    _check_cache_token(x_cache_token)
+    content_length = _parse_content_length(request)
+    try:
+        written = await CacheCrudHandle.save_cache_stream(
+            filename, request.stream(), content_length=content_length
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+    except OSError as error:
+        Logger.error(f"上传缓存文件失败: {error}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to save cache file.") from error
+    return {"data": {"filename": filename, "bytes": written}}
 
 
 @RESOURCE_ROUTE.get('/cache/raw/{filename:path}')
@@ -237,9 +297,15 @@ async def api_upload_cache_file(
             detail="Filename must be provided."
         )
 
+    async def upload_chunks():
+        while chunk := await file.read(1024 * 1024):
+            yield chunk
+
     try:
-        flag = CacheCrudHandle.save_cache_file(file.filename, await file.read())
-        return {"data": flag}
-    except Exception as e:
-        Logger.error(f"上传缓存文件失败: {e}")
-        raise HTTPException(status_code=500, detail="内部服务器错误")
+        await CacheCrudHandle.save_cache_stream(file.filename, upload_chunks())
+        return {"data": True}
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+    except OSError as error:
+        Logger.error(f"上传缓存文件失败: {error}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to save cache file.") from error
