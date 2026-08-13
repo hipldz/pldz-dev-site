@@ -1,5 +1,5 @@
 -r requirements.txt
 
 autopep8
-httpx
+httpx2
 pytest

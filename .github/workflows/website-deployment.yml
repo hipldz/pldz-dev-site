@@ -1,0 +1,63 @@
+name: Website Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "website/package.json"
+  workflow_dispatch:
+
+concurrency:
+  group: website-deployment
+  cancel-in-progress: true
+
+jobs:
+  build-and-notify:
+    name: Build website and notify server www deployment
+    runs-on: ubuntu-latest
+
+    environment: main-branch
+
+    env:
+      ARTIFACT_NAME: pldz-dev-site-website-dist
+      SERVER_NOTICE_URL: ${{ secrets.SERVER_NOTICE_URL }}
+      SERVER_DEPLOY_TOKEN: ${{ secrets.SERVER_DEPLOY_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Build
+        working-directory: website
+        run: npm run build
+
+      - name: Upload dist artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: website/dist
+          if-no-files-found: error
+
+      - name: Notify target server
+        if: env.SERVER_NOTICE_URL != '' && env.SERVER_DEPLOY_TOKEN != ''
+        run: |
+          curl -f -X POST "$SERVER_NOTICE_URL" \
+            -H "X-Deploy-Token: ${SERVER_DEPLOY_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "folder": "website",
+              "artifact_url": "${{ steps.upload.outputs.artifact-url }}"
+            }'

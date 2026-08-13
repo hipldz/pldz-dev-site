@@ -29,14 +29,14 @@
 - Toastify：轻量 toast 提示
 - 原生 Fetch / XMLHttpRequest：API 请求与上传进度
 
-前端源码位于 `web/`，主要入口是：
+前端源码位于 `website/`，主要入口是：
 
-- `web/src/main.js`
-- `web/src/App.vue`
-- `web/src/routers/index.js`
-- `web/src/store/index.js`
-- `web/src/utils/apis/*.js`
-- `web/src/views/*.vue`
+- `website/src/main.js`
+- `website/src/App.vue`
+- `website/src/routers/index.js`
+- `website/src/store/index.js`
+- `website/src/utils/apis/*.js`
+- `website/src/views/*.vue`
 
 ### 后端
 
@@ -46,7 +46,7 @@
 - python-frontmatter
 - watchdog
 - PyJWT
-- passlib + bcrypt
+- bcrypt
 - python-dotenv
 - python-multipart
 - Pillow：图片压缩、缩放和 WebP/GIF 动图处理
@@ -56,8 +56,8 @@
 - `server/main.py`
 - `server/routes/app.py`
 - `server/core/config.py`
-- `server/scripts/filesystem/website/article_watchdog.py`
-- `server/scripts/db/connection.py`
+- `server/workers/website/article_indexer.py`
+- `server/storage/db/json_store.py`
 
 ### 部署
 
@@ -71,16 +71,32 @@
 ```text
 .
 ├── data/                      # 内容、图片、资源配置、缓存、JSON 数据库、模板产物
-├── cache/                     # 图片缩放压缩后的本地缓存，运行时自动生成
 ├── nginx/                     # Nginx 主配置和站点配置
 ├── server/                    # FastAPI 后端
-├── web/                       # Vue 3 前端工程
+├── website/                   # Vue 3 网站前端工程
 ├── Dockerfile                 # backend 镜像构建文件
 ├── docker-compose.yaml        # backend + nginx 编排
 ├── requirements.txt           # Python 生产运行依赖
 ├── requirements-dev.txt       # Python 本地开发/测试依赖
 ├── .env.example               # 环境变量示例
 └── README.md                  # 当前文档
+```
+
+后端在各技术层内使用同一组业务域，避免同一项功能散落在无关分类中：
+
+```text
+server/
+├── routes/
+│   ├── website/               # 文章、评论、分析、图片、白板、演示和公开资源
+│   ├── identity/              # 登录、用户与权限接口
+│   └── operations/            # 缓存管理与静态站部署接口
+├── services/
+│   ├── website/               # 网站业务逻辑
+│   ├── identity/              # 身份与访问控制
+│   └── operations/            # 运维编排
+├── storage/                   # 按 website/operations 继续细分的持久化与缓存实现
+├── workers/website/           # 网站派生数据的后台任务
+└── core/                      # 配置、日志等应用基础设施
 ```
 
 ## 运行模式总览
@@ -131,7 +147,7 @@ SITE_PORT=10058
 前端：
 
 ```bash
-cd web
+cd website
 npm install
 npm run dev
 ```
@@ -166,6 +182,7 @@ IMAGES_PATH=data/images
 WWW_PATH=data/www
 RESOURCES_PATH=data/resources
 CACHE_PATH=data/cache
+WEBP_CACHE_PATH=data/cache/webp
 DB_PATH=data/db
 
 SECRET_KEY=your-super-secret-key
@@ -194,7 +211,8 @@ CACHE_API_TOKEN=change-me
 
 - 自动定位项目根目录。
 - 从项目根目录读取 `.env`。
-- 如果 `.env` 不存在，后端会直接退出。
+- 如果 `.env` 不存在，后端会提示缺失项，并使用进程环境变量或默认值继续启动。
+- 缺失、无效和仍为示例值的配置会在启动日志中显示，但不会打印敏感值。
 - 所有相对路径最终都会转换为项目根目录下的绝对路径。
 
 关键路径的含义：
@@ -206,6 +224,7 @@ CACHE_API_TOKEN=change-me
 | `WWW_PATH`       | `data/www`       | 前端构建产物和 Demo 模板目录 |
 | `RESOURCES_PATH` | `data/resources`  | 导航、广告、协议等资源配置   |
 | `CACHE_PATH`     | `data/cache`      | 管理后台缓存资源目录         |
+| `WEBP_CACHE_PATH` | `data/cache/webp` | 图片派生缓存目录                  |
 | `DB_PATH`        | `data/db`         | JSON 数据库目录              |
 | `SECRET_KEY`     | 无安全默认值      | JWT 签名密钥                 |
 | `ADMIN_USERNAME` | `admin@pldz1.com` | 管理员账号                   |
@@ -221,9 +240,10 @@ CACHE_API_TOKEN=change-me
 
 1. 加载 `.env`。
 2. 初始化日志。
-3. 开启文章目录 watchdog 线程。
-4. 初始化管理员账号。
-5. 启动 FastAPI 应用。
+3. 清理过期或超量的图片派生缓存。
+4. 开启文章目录 watchdog 线程。
+5. 仅在管理员不存在时初始化账号。
+6. 启动 FastAPI 应用。
 
 伪流程：
 
@@ -231,17 +251,18 @@ CACHE_API_TOKEN=change-me
 server/main.py
   -> ProjectConfig.load_env()
   -> Logger.init_logger()
+  -> ImageCacheStore.cleanup()
   -> threading.Thread(target=start_watch, daemon=True).start()
-  -> AuthorizedHandler.init_admin()
+  -> AuthorizationService.init_admin()
   -> run_dev()
 ```
 
 `run_dev()` 会：
 
-- 启用 CORS。
-- 允许所有 origin 正则。
-- 允许携带 Cookie。
 - 使用 `SITE_HOST` 和 `SITE_PORT` 启动 Uvicorn。
+
+前端开发通过 Vite 的 `/api` 同源代理访问后端，因此服务端不再开放携带凭据的
+通配 CORS。
 
 ## FastAPI 路由总览
 
@@ -314,16 +335,15 @@ prefix = /api/v1/authorization
 {
   "id": "...",
   "username": "...",
-  "raw_password": "...",
   "nickname": "...",
   "avatar": "...",
   "isadmin": true
 }
 ```
 
-注意：`password`、`token`、`blacklisted` 会在读取用户时被剔除。
+注意：`password`、`token`、`blacklisted` 和 2FA Secret 都会在读取用户时被剔除。
 
-### 协议、隐私与缓存资源
+### 协议、隐私与公开资源
 
 Router:
 
@@ -331,26 +351,39 @@ Router:
 prefix = /api/v1/resource
 ```
 
-| 方法   | 路径              | 权限   | 请求体         | 返回         |
-| ------ | ----------------- | ------ | -------------- | ------------ |
-| `GET`  | `/privacy_policy` | 公开   | 无             | HTML 页面    |
-| `GET`  | `/user_agreement` | 公开   | 无             | HTML 页面    |
-| `GET`  | `/cache/all`      | 管理员 | 无             | 缓存文件列表 |
-| `POST` | `/cache/download` | 管理员 | `{ filename }` | 文件下载     |
-| `POST` | `/cache/delete`   | 管理员 | `{ filename }` | `true/false` |
-| `POST` | `/cache/upload`   | 管理员 | multipart file | `true/false` |
-| `GET`  | `/cache/files/{filename}` | `X-Cache-Token` | 无 | 流式下载缓存文件 |
-| `PUT`  | `/cache/files/{filename}` | `X-Cache-Token` | 原始文件请求体 | 流式、原子上传缓存文件 |
+| 方法  | 路径                              | 权限 | 返回      |
+| ----- | --------------------------------- | ---- | --------- |
+| `GET` | `/website/legal/privacy-policy`   | 公开 | HTML 页面 |
+| `GET` | `/website/legal/user-agreement`   | 公开 | HTML 页面 |
+| `GET` | `/raw/{file_path}`                | 公开 | Resource 文件 |
 
-自动化程序调用 `/cache/files/{filename}` 时不需要登录 Cookie，但必须携带
+### 缓存管理
+
+Router:
+
+```text
+prefix = /api/v1/cache
+```
+
+| 方法   | 路径                | 权限            | 请求体         | 返回         |
+| ------ | ------------------- | --------------- | -------------- | ------------ |
+| `GET`  | `/all`              | 管理员          | 无             | 缓存文件列表 |
+| `POST` | `/download`         | 管理员          | `{ filename }` | 文件下载     |
+| `POST` | `/delete`           | 管理员          | `{ filename }` | `true/false` |
+| `POST` | `/upload`           | 管理员          | multipart file | `true/false` |
+| `GET`  | `/raw/{filename}`   | 管理员          | 无             | 登录态下载链接 |
+| `GET`  | `/files/{filename}` | `X-Cache-Token` | 无             | 机器下载     |
+| `PUT`  | `/files/{filename}` | `X-Cache-Token` | 原始文件请求体 | 流式原子上传 |
+
+自动化程序调用 `/api/v1/cache/files/{filename}` 时不需要登录 Cookie，但必须携带
 `X-Cache-Token: <CACHE_API_TOKEN>`；令牌由服务器 `.env` 的 `CACHE_API_TOKEN` 配置。
-原有 `/cache/upload`、`/cache/download` 管理接口仍使用管理员登录认证。
+管理接口使用管理员登录认证，机器接口统一使用顶级 Cache URL。
 
 协议文件来源：
 
 ```text
-data/resources/privacy_policy.txt
-data/resources/user_agreement.txt
+data/resources/website/legal/privacy_policy.txt
+data/resources/website/legal/user_agreement.txt
 ```
 
 缓存文件来源：
@@ -408,7 +441,7 @@ prefix = /api/v1/website/article
 
 读取单篇文章时，后端会：
 
-- 在 `data/db/articles.json` 中把该文章 `views + 1`。
+- 在 `data/db/content/article_views.json` 中把该文章 `views + 1`。
 - 再从对应 Markdown 文件中读取正文内容。
 
 ### 图片
@@ -423,7 +456,6 @@ prefix = /api/v1/website/image
 | ------ | -------------------------------------- | -------- | ------------------------------------ | -------------------------- |
 | `GET`  | `/{category}/{image}`                  | 公开     | 无                                   | 默认 `128x128` 压缩图片    |
 | `GET`  | `/{category}/{image}@original`         | 公开     | 无                                   | 原始图片文件               |
-| `GET`  | `/{category}/{image}@raw`              | 公开     | 无                                   | 原始图片文件               |
 | `GET`  | `/{category}/{image}@{size}`           | 公开     | 无                                   | 宽高同值的压缩图片         |
 | `GET`  | `/{category}/{image}@{width}x{height}` | 公开     | 无                                   | 指定尺寸压缩图片           |
 | `POST` | `/category/all`                        | 管理员   | `{ category }`                       | 指定分类下图片文件名列表   |
@@ -436,7 +468,7 @@ prefix = /api/v1/website/image
 图片读取接口会默认压缩输出：
 
 - 不带尺寸时默认按 `128x128` 等比缩放。
-- `@original` 或 `@raw` 返回原始文件，不进行缩放、压缩和格式转换。
+- `@original` 返回原始文件，不进行缩放、压缩和格式转换。
 - `@1024` 表示宽高都按 `1024` 处理。
 - `@1024x768` 表示按指定宽高处理。
 - JPG / PNG / WEBP 等普通图片会保持比例缩放，不拉伸，默认输出 WebP。
@@ -467,7 +499,7 @@ data/images/{category}/{filename}
 压缩后的图片会缓存在项目根目录：
 
 ```text
-data/webp/{image_id}_{width}x{height}.webp
+data/cache/webp/{image_id}_{width}x{height}.webp
 ```
 
 默认质量为 `80`，缓存存在时会直接返回缓存文件，不再处理原图。
@@ -500,7 +532,7 @@ prefix = /api/v1/website/livedemo
 配置文件：
 
 ```text
-data/resources/website/livedemo.json
+data/resources/website/config/livedemo.json
 ```
 
 Live Demo 项结构：
@@ -535,7 +567,7 @@ prefix = /api/v1/website/comment
 评论存储在：
 
 ```text
-data/db/comments.json
+data/db/content/comments.json
 ```
 
 评论数据按 `article_id` 分组：
@@ -585,7 +617,7 @@ prefix = /api/v1/website/whiteboard
 
 白板当前实现是内存态：
 
-- 存储在 `WhiteBoardHandler.white_board_list`。
+- 存储在 `WhiteboardService.white_board_list`。
 - 不写入数据库或文件。
 - 服务重启后全部丢失。
 - key 是 `100-999` 的三位数字。
@@ -604,7 +636,7 @@ prefix = /api/v1/website/whiteboard
 | `/articles/:category` | `TutorialsPage.vue` | 某个分类下的系列文章                       |
 | `/article/:id`        | `ArticlePage.vue`   | 文章详情                                   |
 | `/livedemo`           | `LiveDemoPage.vue`  | Demo / 项目预览                            |
-| `/whiteboard`         | `WhiteBoard.vue`    | 临时文本白板                               |
+| `/whiteboard`         | `WhiteboardPage.vue` | 临时文本白板                              |
 | `/admin/:id?`         | `AdminPage.vue`     | 管理后台                                   |
 | `/404`                | `NotFound.vue`      | 404 页面                                   |
 | `/:pathMatch(.*)*`    | redirect `/`        | 未匹配路径回首页                           |
@@ -613,11 +645,11 @@ Nginx 生产配置中：
 
 ```nginx
 location / {
-    try_files $uri $uri/ /web/index.html;
+    try_files $uri $uri/ /website/index.html;
 }
 ```
 
-这保证了刷新 `/article/:id` 这类前端路由时仍然回到 `/web/index.html`。
+这保证了刷新 `/article/:id` 这类前端路由时仍然回到 `/website/index.html`。
 
 ## 前端页面规格
 
@@ -626,7 +658,7 @@ location / {
 组件：
 
 ```text
-web/src/views/HomePage.vue
+website/src/views/HomePage.vue
 ```
 
 首页加载时会并发请求：
@@ -645,7 +677,7 @@ web/src/views/HomePage.vue
 组件：
 
 ```text
-web/src/views/TutorialsPage.vue
+website/src/views/TutorialsPage.vue
 ```
 
 有两种模式：
@@ -668,7 +700,7 @@ web/src/views/TutorialsPage.vue
 组件：
 
 ```text
-web/src/views/ArticlePage.vue
+website/src/views/ArticlePage.vue
 ```
 
 能力：
@@ -705,7 +737,7 @@ yaml, yml
 组件：
 
 ```text
-web/src/views/LiveDemoPage.vue
+website/src/views/LiveDemoPage.vue
 ```
 
 加载：
@@ -736,7 +768,7 @@ GET /api/v1/website/livedemo/all
 组件：
 
 ```text
-web/src/views/WhiteBoard.vue
+website/src/views/WhiteboardPage.vue
 ```
 
 行为：
@@ -751,7 +783,7 @@ web/src/views/WhiteBoard.vue
 组件：
 
 ```text
-web/src/views/AdminPage.vue
+website/src/views/AdminPage.vue
 ```
 
 路由：
@@ -782,7 +814,7 @@ web/src/views/AdminPage.vue
 组件：
 
 ```text
-web/src/components/HeaderBar.vue
+website/src/components/HeaderBar.vue
 ```
 
 能力：
@@ -804,7 +836,7 @@ web/src/components/HeaderBar.vue
 组件：
 
 ```text
-web/src/components/FooterBar.vue
+website/src/components/FooterBar.vue
 ```
 
 加载：
@@ -824,7 +856,7 @@ GET /api/v1/authorization/privacy
 组件：
 
 ```text
-web/src/components/SearchOverlay.vue
+website/src/components/SearchOverlay.vue
 ```
 
 搜索数据来源：
@@ -843,7 +875,7 @@ GET /api/v1/website/article/all/article
 搜索引擎：
 
 ```text
-web/src/utils/search-engine.js
+website/src/utils/search-engine.js
 ```
 
 匹配逻辑：
@@ -861,7 +893,7 @@ web/src/utils/search-engine.js
 Vuex store 位于：
 
 ```text
-web/src/store/index.js
+website/src/store/index.js
 ```
 
 包含两个 module。
@@ -991,7 +1023,7 @@ title: cloud-service 系列文章
 实现位置：
 
 ```text
-server/scripts/filesystem/website/article_crud.py
+server/storage/resource/website/article.py
 ```
 
 生成逻辑：
@@ -1013,7 +1045,7 @@ pid = uuid.uuid5(uuid.NAMESPACE_URL, rel).hex[:16]
 实现位置：
 
 ```text
-server/scripts/filesystem/website/article_watchdog.py
+server/workers/website/article_indexer.py
 ```
 
 后端启动时会：
@@ -1021,18 +1053,17 @@ server/scripts/filesystem/website/article_watchdog.py
 1. 执行 `initial_sync()`。
 2. 遍历 `ARTICLES_PATH` 下所有 `.md` 文件。
 3. 用 python-frontmatter 读取 metadata 和正文。
-4. 将 metadata 写入 `data/db/articles.json`。
-5. 清理数据库中已经不存在的文章路径。
+4. 将 metadata 写入 `data/cache/article-index/index.json`。
+5. 清理索引中已经不存在的文章路径。
 6. 启动 watchdog 持续监听新增、修改、移动、删除。
 
-`articles.json` 中只保存：
+`data/cache/article-index/index.json` 中只保存可重建字段：
 
 ```json
 {
   "id": "...",
   "path": "category/file.md",
-  "meta": {},
-  "views": 0
+  "meta": {}
 }
 ```
 
@@ -1058,39 +1089,53 @@ server/scripts/filesystem/website/article_watchdog.py
 ```text
 data
 ├── articles/                  # Markdown 文章
-├── cache/                     # 可上传/下载/删除的缓存资源
-├── db/                        # JSON 数据库
+├── cache/                     # 可清理的派生文件和临时产物
+├── db/                        # 按业务归属分类的内部持久记录
 ├── images/                    # 图片资源
-├── resources/                 # 站点配置和协议文本
-└── templates/                 # 前端构建产物和独立 Demo 模板
+├── resources/                 # 可通过受控接口返回的权威资源
+└── www/                       # 已发布的静态站点产物
 ```
 
 ### data/db
 
 ```text
-data/db/articles.json
-data/db/comments.json
-data/db/users.json
+data/db/content/article_views.json
+data/db/content/comments.json
+data/db/identity/users.json
+data/db/analytics/analytics.json
+data/db/deployment/www_deployments.json
 ```
 
-| 文件            | 说明                                     |
-| --------------- | ---------------------------------------- |
-| `articles.json` | 文章索引、metadata、views                |
-| `comments.json` | 按文章 ID 分组的评论树                   |
-| `users.json`    | 用户、密码 hash、头像、token、黑名单状态 |
+| 分类 | 文件 | 说明 |
+| --- | --- | --- |
+| Content | `article_views.json` | 不可从 Markdown 重建的文章浏览量 |
+| Content | `comments.json` | 按文章 ID 分组的评论树 |
+| Identity | `users.json` | 用户、密码 hash、token 和 2FA 状态 |
+| Analytics | `analytics.json` | 统计事件和聚合数据 |
+| Deployment | `www_deployments.json` | WWW 部署历史 |
 
 JSON 数据库访问封装在：
 
 ```text
-server/scripts/db/connection.py
+server/storage/db/json_store.py
 ```
+
+旧数据卷只通过一次性 Shell 脚本迁移，运行时代码不读取旧路径：
+
+```bash
+./migrate-data.sh
+```
+
+脚本会移动旧 DB、Resource、WebP 缓存和 `data/www/web`，并从旧的合并文章 DB
+提取浏览量；原合并文件移到 `data/migration-backup/articles.json`。若新旧目标同时存在，
+脚本会直接报冲突并停止，不会覆盖文件。
 
 读写特点：
 
-- 使用 `threading.Lock()` 做单进程内互斥。
+- 使用线程重入锁与 POSIX `flock` 保护完整读改写事务。
 - 文件不存在时读取为空对象。
-- JSON 解析失败时读取为空对象。
-- 写入时 `ensure_ascii=False` 和 `indent=2`。
+- JSON 解析失败时明确报错，避免把损坏数据当成空库覆盖。
+- 写入采用临时文件、`fsync` 和 `os.replace` 原子发布。
 
 ### data/images
 
@@ -1108,7 +1153,7 @@ data/images/live-demo
 ```text
 /api/v1/website/image/{category}/{filename}
 /api/v1/website/image/{category}/{filename}@original
-/api/v1/website/image/{category}/{filename}@raw
+/api/v1/website/image/{category}/{filename}@original
 /api/v1/website/image/{category}/{filename}@{size}
 /api/v1/website/image/{category}/{filename}@{width}x{height}
 ```
@@ -1125,15 +1170,17 @@ data/images/live-demo
 ### data/resources
 
 ```text
-data/resources/privacy_policy.txt
-data/resources/user_agreement.txt
-data/resources/website/livedemo.json
+data/resources/website/config/navigation.json
+data/resources/website/config/adbanner.json
+data/resources/website/config/livedemo.json
+data/resources/website/legal/privacy_policy.txt
+data/resources/website/legal/user_agreement.txt
 ```
 
 ### data/www
 
 ```text
-data/www/web
+data/www/website
 data/www/sse-markdown
 ```
 
@@ -1171,7 +1218,7 @@ Content-Type: application/json
 4. 后端校验压缩包路径、解压、检查 `index.html`、备份旧目录。
 5. 后端替换 `data/www/{folder}`，并在 Linux 上设置目录 `755`、文件 `644`。
 
-`folder` 就是 `data/www` 下的目标目录名，例如主站 `web` 或某个 Demo 的目录名。
+`folder` 就是 `data/www` 下的目标目录名，例如主站 `website` 或某个 Demo 的目录名。
 
 `DEPLOY_GITHUB_TOKEN` 只放在服务器 `.env`，不要从浏览器或 CI 请求体传入。
 
@@ -1221,7 +1268,7 @@ curl http://127.0.0.1:10058/api/v1/website/livedemo/all
 ### 前端开发
 
 ```bash
-cd web
+cd website
 npm install
 npm run dev
 ```
@@ -1235,17 +1282,17 @@ http://127.0.0.1:10060
 ### 前端构建
 
 ```bash
-cd web
+cd website
 npm run build
 ```
 
-默认 Vite 会输出到 `web/dist`，但当前 Docker/Nginx 配置挂载的是：
+默认 Vite 会输出到 `website/dist`，但当前 Docker/Nginx 配置挂载的是：
 
 ```text
-data/www/web
+data/www/website
 ```
 
-因此如果要让 Nginx 服务最新前端，需要把构建产物同步到 `data/www/web`，或调整 Vite `build.outDir` / Nginx volume。
+因此如果要让 Nginx 服务最新前端，需要把构建产物同步到 `data/www/website`，或调整 Vite `build.outDir` / Nginx volume。
 
 ## Docker 部署流程
 
@@ -1294,12 +1341,12 @@ docker compose down
 - 挂载：
   - `./nginx/nginx.conf`
   - `./nginx/prod.d`
-  - `./data/www/web`
+  - `./data/www/website`
 
 ### Nginx 路由
 
 ```text
-/                  -> /usr/share/nginx/www/web/index.html
+/                  -> /usr/share/nginx/www/website/index.html
 /api/*             -> http://backend:10057
 /io/sse-markdown   -> /usr/share/nginx/www/sse-markdown/index.html
 ```
@@ -1356,45 +1403,12 @@ docker compose down
 
 这些不是文档推测，而是当前代码实现中值得 AI 或维护者特别注意的点。
 
-### 用户密码处理存在实现风险
+### 用户密码与初始化
 
-`AuthorizedHandler.add_user()` 当前会始终使用 `ADMIN_PASSWORD` 生成 `password` hash：
-
-```python
-hash_password = cls.hash_password(ADMIN_PASSWORD)
-```
-
-同时 `register()` 调用时传入的是：
-
-```python
-AuthorizedHandler.hash_password(data.password)
-```
-
-但这个值只会被作为 `raw_password` 保存，实际 password hash 仍然来自 `ADMIN_PASSWORD`。这意味着普通注册用户的登录校验可能会受管理员密码影响，而不是自己的注册密码。
-
-如果要修复，建议重新梳理：
-
-- `add_user(username, raw_password, nickname, avatar)` 只接受明文输入或只接受 hash 输入，二选一。
-- 不要保存 `raw_password`。
-- 管理后台不展示明文密码。
-
-### 前端协议链接路径可能不匹配
-
-`LoginCard.vue` 中协议链接写成：
-
-```text
-/api/v1/website/resource/user_agreement
-/api/v1/website/resource/privacy_policy
-```
-
-但后端实际路由是：
-
-```text
-/api/v1/resource/user_agreement
-/api/v1/resource/privacy_policy
-```
-
-如果点击协议 404，应优先检查这个路径。
+- 密码仅以 bcrypt Hash 保存。
+- API 和管理后台不返回或展示明文密码。
+- 管理员已存在时，启动过程不会覆盖其密码或资料。
+- 注册密码要求 8–128 个字符。
 
 ### 白板不持久化
 
@@ -1406,11 +1420,11 @@ AuthorizedHandler.hash_password(data.password)
 
 如果需要可靠协作或持久保存，应迁移到 `data/db`、Redis 或数据库。
 
-### JSON 数据库只保证单进程内互斥
+### JSON 数据库适用边界
 
-`threading.Lock()` 只能保护单个 Python 进程内的并发写入。
-
-如果未来改成多 worker、多进程或多个 backend 容器同时写同一份 `data/db/*.json`，会有写入竞争风险。
+JSON Store 使用线程锁与 POSIX `flock` 保护完整读改写事务，并通过多进程并发测试。
+它适合当前低写入量、共享本地数据卷的部署；如果需要多主机横向扩展、复杂查询或
+更强事务能力，应迁移 SQLite 或正式数据库。
 
 ### 文章 ID 与文件路径强绑定
 
@@ -1426,11 +1440,11 @@ AuthorizedHandler.hash_password(data.password)
 
 ### `navigation.json` 当前示例中存在空对象
 
-`data/resources/website/navigation.json` 的 `data` 数组当前包含一个空对象。后端读取时会跳过缺少 `title` 或 `url` 的项，并输出 warning。
+`data/resources/website/config/navigation.json` 的 `data` 数组当前包含一个空对象。后端读取时会跳过缺少 `title` 或 `url` 的项，并输出 warning。
 
 ### 前端构建产物目录需要明确
 
-Vite 默认输出 `web/dist`，Nginx 当前服务 `data/www/web`。如果部署时发现页面不是最新版本，要检查构建产物是否同步到了 Nginx 挂载目录。
+Vite 默认输出 `website/dist`，Nginx 当前服务 `data/www/website`。如果部署时发现页面不是最新版本，要检查构建产物是否同步到了 Nginx 挂载目录。
 
 ## 常见维护任务
 
@@ -1439,7 +1453,7 @@ Vite 默认输出 `web/dist`，Nginx 当前服务 `data/www/web`。如果部署�
 1. 在 `data/articles/{category}/` 下新增 `.md` 文件。
 2. 填写 frontmatter。
 3. 保存文件。
-4. 后端 watchdog 会自动同步到 `data/db/articles.json`。
+4. 后端 watchdog 会自动同步到 `data/cache/article-index/index.json`。
 5. 访问 `/articles/{category}` 或 `/article/{id}` 查看。
 
 如果后端没运行，启动后会做初次全量同步。
@@ -1567,7 +1581,7 @@ docker rmi docker.m.daocloud.io/library/nginx:1.25-alpine
 2. Markdown 文件是否以 `.md` 结尾。
 3. frontmatter 是否可被 python-frontmatter 解析。
 4. 后端启动日志中是否出现初次同步。
-5. `data/db/articles.json` 是否生成。
+5. `data/cache/article-index/index.json` 是否生成。
 6. `serialNo` 是否符合页面预期：
    - `/articles` 只展示 `serialNo=0`。
 
@@ -1599,17 +1613,19 @@ docker rmi docker.m.daocloud.io/library/nginx:1.25-alpine
 ### 后端约定
 
 - 所有 API 统一挂载在 `/api/v1`。
-- 路由定义放在 `server/routes/`。
-- 文件系统操作放在 `server/scripts/filesystem/`。
-- JSON 数据库操作放在 `server/scripts/db/`。
+- 路由按 `website/identity/operations` 业务域放在 `server/routes/`。
+- 业务编排使用同样的业务域放在 `server/services/`，网站评论和分析都属于 `website`。
+- DB、Resource 和 Cache 访问放在 `server/storage/`，并继续按业务域分组。
+- 后台常驻任务放在 `server/workers/<业务域>/`。
+- 序列化结构按 `db/resource/website` 放在 `server/typedef/`。
 - 配置路径统一通过 `ProjectConfig` 获取。
 - API 返回尽量包裹在 `{ "data": ... }` 中，保持前端请求工具兼容。
 
 ### 前端约定
 
-- 页面级组件放在 `web/src/views/`。
-- 可复用组件放在 `web/src/components/`。
-- API 封装放在 `web/src/utils/apis/`。
+- 页面级组件放在 `website/src/views/`。
+- 可复用组件放在 `website/src/components/`。
+- API 封装放在 `website/src/utils/apis/`。
 - 全局用户状态放在 Vuex `authState`。
 - 页面路由使用 history mode。
 - 所有 API 请求默认使用相对路径，让 Vite/Nginx 代理处理环境差异。
@@ -1628,10 +1644,10 @@ docker rmi docker.m.daocloud.io/library/nginx:1.25-alpine
 
 1. 这是一个内容站，不是传统数据库驱动的 CMS。
 2. 文章的事实来源是 `data/articles` 下的 Markdown。
-3. `data/db/articles.json` 是 Markdown 的索引缓存，不是文章正文主存储。
-4. 用户、评论、文章 views 当前存在 JSON 文件里。
+3. `data/cache/article-index/index.json` 是可重建的 Markdown metadata 索引。
+4. 用户、评论和 `data/db/content/article_views.json` 属于不可随意清理的 JSON DB。
 5. 管理后台写的是本地 JSON 配置和本地文件。
-6. 生产入口是 Nginx，前端静态文件来自 `data/www/web`。
+6. 生产入口是 Nginx，前端静态文件来自 `data/www/website`。
 7. 主后端 `python server/main.py`
 8. 前端请求工具默认只返回后端 `data` 字段。
 9. 管理员权限只由用户名是否等于 `ADMIN_USERNAME` 决定。
@@ -1643,15 +1659,15 @@ docker rmi docker.m.daocloud.io/library/nginx:1.25-alpine
 server/main.py
 server/routes/app.py
 server/core/config.py
-server/scripts/filesystem/website/article_watchdog.py
-server/scripts/filesystem/website/article_crud.py
-server/scripts/db/connection.py
-server/scripts/db/authorization.py
+server/workers/website/article_indexer.py
+server/storage/resource/website/article.py
+server/storage/db/json_store.py
+server/services/identity/authorization.py
 server/routes/website/*.py
-web/src/routers/index.js
-web/src/utils/apis/request.js
-web/src/store/index.js
-web/src/views/*.vue
+website/src/routers/index.js
+website/src/utils/apis/request.js
+website/src/store/index.js
+website/src/views/*.vue
 ```
 
 ## License

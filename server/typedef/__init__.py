@@ -1,9 +1,29 @@
-from .website import T_ArticleInfo, T_TagCount
-from .db import T_ArticleMeta, T_ArticleData
+"""Serialized structures grouped by DB, resource and Website API boundaries."""
+
+from .db import ArticleIndexRecord, ArticleMeta, CommentRecord, UserRecord
+from .resource import ArticleDocument, LiveDemoResource
+from .website import (
+    ArticleDetailResponse,
+    ArticleListResponse,
+    ArticleSummary,
+    CategoryListResponse,
+    TagCount,
+    TagListResponse,
+    WhiteboardItem,
+)
 
 __all__ = [
-    "T_ArticleMeta",
-    "T_ArticleData",
-    "T_ArticleInfo",
-    "T_TagCount"
+    "ArticleMeta",
+    "ArticleIndexRecord",
+    "CommentRecord",
+    "UserRecord",
+    "ArticleDocument",
+    "LiveDemoResource",
+    "ArticleSummary",
+    "TagCount",
+    "ArticleListResponse",
+    "ArticleDetailResponse",
+    "CategoryListResponse",
+    "TagListResponse",
+    "WhiteboardItem",
 ]

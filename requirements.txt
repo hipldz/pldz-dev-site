@@ -8,8 +8,7 @@ Jinja2
 PyJWT
 cryptography
 python-dotenv
-passlib
-bcrypt<4.1.0
+bcrypt>=4.0,<5
 pyotp
 qrcode
 Pillow

@@ -1,29 +1,13 @@
-from typing import TypedDict, List
+from typing import NotRequired, TypedDict
 
 
-class T_ArticleMeta(TypedDict):
-    """
-    文章完整元数据结构(JSON File 数据库存储)
-    - title: 文章标题
-    - author: 文章作者
-    - category: 文章分类
-    - serialNo: 文章序号
-    - status: 文章状态（如：草稿、已发布）
-    - tags: 文章标签列表
-    - date: 文章发布日期
-    - thumbnail: 缩略图链接
-    - summary: 文章摘要
-    - csdn: CSDN 链接
-    - juejin: 掘金链接
-    - github: GitHub 链接
-    - gitee: Gitee 链接
-    """
+class ArticleMeta(TypedDict, total=False):
     title: str
     author: str
     category: str
     serialNo: int
     status: str
-    tags: List[str]
+    tags: list[str]
     date: str
     thumbnail: str
     summary: str
@@ -33,17 +17,11 @@ class T_ArticleMeta(TypedDict):
     gitee: str
 
 
-class T_ArticleData(TypedDict):
-    """
-    完整文章数据结构(数据库存储)
-    - id: 文章唯一标识符
-    - meta: 文章元数据
-    - content: 文章内容
-    - path: 文章路径
-    - views: 文章浏览量
-    """
+class ArticleIndexRecord(TypedDict):
+    """Article metadata enriched with persistent views at the storage boundary."""
+
     id: str
-    meta: T_ArticleMeta
-    content: str
     path: str
-    views: int
+    meta: ArticleMeta
+    views: NotRequired[int]
+    content: NotRequired[str]

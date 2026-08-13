@@ -29,7 +29,7 @@ def test_authorization_login_rejects_unknown_user(client):
 
 
 def test_authorization_register_success_sets_cookie(client, monkeypatch):
-    from routes import authorization
+    from routes.identity import authorization
 
     created_user = {
         "id": "pytest-user-id",
@@ -41,39 +41,52 @@ def test_authorization_register_success_sets_cookie(client, monkeypatch):
     }
 
     monkeypatch.setattr(
-        authorization.AuthorizedHandler,
+        authorization.AuthorizationService,
         "get_user_by_username",
         lambda username: None if not hasattr(test_authorization_register_success_sets_cookie, "created") else created_user,
     )
     monkeypatch.setattr(
-        authorization.AuthorizedHandler,
+        authorization.AuthorizationService,
         "add_user",
         lambda username, password, nickname: setattr(test_authorization_register_success_sets_cookie, "created", True) or True,
     )
     monkeypatch.setattr(
-        authorization.AuthorizedHandler,
+        authorization.AuthorizationService,
         "create_access_token",
         lambda username: "access-token",
     )
     monkeypatch.setattr(
-        authorization.AuthorizedHandler,
+        authorization.AuthorizationService,
         "create_refresh_token",
         lambda username: "refresh-token",
     )
 
-    data = assert_data_response(
-        client.post(
-            "/api/v1/authorization/register",
-            json={
-                "username": "pytest-register@example.com",
-                "password": "secret",
-                "nickname": "pytest",
-            },
-        )
+    response = client.post(
+        "/api/v1/authorization/register",
+        json={
+            "username": "pytest-register@example.com",
+            "password": "secret123",
+            "nickname": "pytest",
+        },
     )
+    data = assert_data_response(response)
 
     assert data["flag"] is True
     assert "access_token" in client.cookies
+    refresh_cookie = next(
+        header for header in response.headers.get_list("set-cookie")
+        if header.startswith("refresh_token=")
+    )
+    assert f"Max-Age={authorization.REFRESH_EXPIRE.days * 86400}" in refresh_cookie
+
+
+def test_authorization_register_rejects_weak_payload(client):
+    response = client.post(
+        "/api/v1/authorization/register",
+        json={"username": "x", "password": "short", "nickname": ""},
+    )
+
+    assert response.status_code == 422
 
 
 def test_authorization_refresh_requires_cookie(client):
@@ -137,21 +150,21 @@ def test_livedemo_all(client):
 
 
 def test_resource_raw_file(client):
-    response = client.get("/api/v1/resource/raw/website/navigation.json")
+    response = client.get("/api/v1/resource/raw/website/config/navigation.json")
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("application/json")
 
 
 def test_resource_privacy_policy_page(client):
-    response = client.get("/api/v1/resource/privacy_policy")
+    response = client.get("/api/v1/resource/website/legal/privacy-policy")
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
 
 
 def test_resource_user_agreement_page(client):
-    response = client.get("/api/v1/resource/user_agreement")
+    response = client.get("/api/v1/resource/website/legal/user-agreement")
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
@@ -170,20 +183,20 @@ def test_resource_raw_rejects_path_traversal(client):
 
 
 def test_cache_raw_missing_file(client):
-    response = client.get("/api/v1/resource/cache/raw/__missing__.txt")
+    response = client.get("/api/v1/cache/raw/__missing__.txt")
 
-    assert response.status_code == 404
+    assert response.status_code == 401
+
+
+def test_cache_openapi_uses_top_level_namespace(client):
+    paths = client.get("/openapi.json").json()["paths"]
+
+    assert "/api/v1/cache/all" in paths
+    assert "/api/v1/resource/cache/all" not in paths
 
 
 def test_image_original_file(client):
     response = client.get("/api/v1/website/image/avatar/default.jpg@original")
-
-    assert response.status_code == 200
-    assert response.headers["content-type"].startswith("image/")
-
-
-def test_image_raw_file_alias(client):
-    response = client.get("/api/v1/website/image/avatar/default.jpg@raw")
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("image/")
@@ -294,12 +307,12 @@ def test_analytics_track_requires_event_name(client):
 
 
 def test_analytics_track_success(client, monkeypatch):
-    from routes import analytics
+    from routes.website import analytics
 
     def fake_track_event(**kwargs):
         return {"flag": True, "event_name": kwargs["event_name"]}
 
-    monkeypatch.setattr(analytics.AnalyticsHandler, "track_event", fake_track_event)
+    monkeypatch.setattr(analytics.AnalyticsService, "track_event", fake_track_event)
 
     data = assert_data_response(
         client.post(

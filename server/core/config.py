@@ -1,15 +1,7 @@
 import os
-import sys
 import dotenv
 
-DEFAULT_RESOURCE_PATH = "data/resources"
-DEFAULT_IMAGE_PATH = "data/images"
-DEFAULT_ARTICLES_PATH = "data/articles"
-DEFAULT_CACHE_PATH = "data/cache"
-DEFAULT_WEBP_CACHE_PATH = "data/webp"
-DEFAULT_DB_PATH = "data/db"
-DEFAULT_WWW_PATH = "data/www"
-
+from .settings import Settings
 
 class ProjectConfig:
     '''
@@ -19,9 +11,10 @@ class ProjectConfig:
     DIR_LOOP = 2
 
     PROJECT_ROOT = ''
+    settings: Settings | None = None
 
     @classmethod
-    def load_env(cls) -> None:
+    def load_env(cls) -> Settings:
         """
         加载环境变量文件 .env
         """
@@ -31,23 +24,29 @@ class ProjectConfig:
         for _ in range(ProjectConfig.DIR_LOOP):
             cls.PROJECT_ROOT = os.path.dirname(cls.PROJECT_ROOT)
 
-        # 判断环境文件是否存在
+        # 加载环境文件；缺失时继续使用默认配置，并交由 Settings 给出提示。
         env_file_path = cls.get_abs_path('', '.env')
+        initial_warnings: tuple[str, ...] = ()
         if not os.path.exists(env_file_path):
-            print(f"环境变量文件 .env 未找到: {env_file_path}")
-            sys.exit(1)
+            initial_warnings = (f"环境变量文件 .env 未找到，将使用环境变量和默认值: {env_file_path}",)
+        else:
+            dotenv.load_dotenv(env_file_path, override=False)
 
-        # 加载环境变量
-        dotenv.load_dotenv(env_file_path, override=False)
+        cls.settings = Settings.from_env(initial_warnings=initial_warnings)
+        return cls.settings
 
     @classmethod
-    def get_abs_path(cls, folder: str = None, fileName: str = None, file_name: str = None) -> str:
+    def get_settings(cls) -> Settings:
+        """Return the loaded settings, or a non-blocking snapshot for imported tools/tests."""
+        if cls.settings is None:
+            cls.settings = Settings.from_env()
+        return cls.settings
+
+    @classmethod
+    def get_abs_path(cls, folder: str = '', file_name: str = '') -> str:
         '''
         获取任何项目文件的绝对路径
         '''
-        folder = folder if folder is not None else ''
-        file_name = file_name if file_name is not None else fileName
-        file_name = file_name if file_name is not None else ''
         path = os.path.normpath(os.path.join(cls.PROJECT_ROOT, folder, file_name))
         return path
 
@@ -63,7 +62,7 @@ class ProjectConfig:
         '''
         获得资源文件的绝对路径
         '''
-        resources_path = os.environ.get('RESOURCES_PATH', DEFAULT_RESOURCE_PATH)
+        resources_path = cls.get_settings().resources_path
         return cls.get_abs_path(resources_path)
 
     @classmethod
@@ -71,7 +70,7 @@ class ProjectConfig:
         '''
         获得存储图像的绝对路径
         '''
-        image_path = os.environ.get('IMAGES_PATH', DEFAULT_IMAGE_PATH)
+        image_path = cls.get_settings().images_path
         return cls.get_abs_path(image_path)
 
     @classmethod
@@ -79,7 +78,7 @@ class ProjectConfig:
         '''
         获得存储文章的绝对路径
         '''
-        articles_path = os.environ.get('ARTICLES_PATH', DEFAULT_ARTICLES_PATH)
+        articles_path = cls.get_settings().articles_path
         return cls.get_abs_path(articles_path)
 
     @classmethod
@@ -87,7 +86,7 @@ class ProjectConfig:
         """
         获取缓存目录的路径
         """
-        cache_path = os.environ.get('CACHE_PATH', DEFAULT_CACHE_PATH)
+        cache_path = cls.get_settings().cache_path
         return cls.get_abs_path(cache_path)
 
     @classmethod
@@ -95,29 +94,48 @@ class ProjectConfig:
         """
         获取缓存目录的路径
         """
-        webp_cache_path = os.environ.get('WEBP_CACHE_PATH', DEFAULT_WEBP_CACHE_PATH)
-        return cls.get_abs_path(webp_cache_path)
+        return cls.get_abs_path(cls.get_settings().webp_cache_path)
+
+    @classmethod
+    def get_article_index_path(cls) -> str:
+        """Return the rebuildable article index cache file."""
+        return cls.get_abs_path(cls.get_settings().cache_path, 'article-index/index.json')
 
     @classmethod
     def get_livedemo_config_path(cls) -> str:
         """
         获取livedemo配置的json文件
         """
-        resource_path = cls.get_resource_path()
-        return os.path.join(resource_path, 'website/livedemo.json')
+        return cls.get_website_config_path('livedemo.json')
+
+    @classmethod
+    def get_website_config_path(cls, filename: str) -> str:
+        return os.path.join(cls.get_resource_path(), 'website', 'config', filename)
+
+    @classmethod
+    def get_website_legal_path(cls, filename: str) -> str:
+        return os.path.join(cls.get_resource_path(), 'website', 'legal', filename)
 
     @classmethod
     def get_db_path(cls) -> str:
         """
         获取 JSON 数据库文件目录的绝对路径
         """
-        db_path = os.environ.get('DB_PATH', DEFAULT_DB_PATH)
+        db_path = cls.get_settings().db_path
         return cls.get_abs_path(db_path)
+
+    @classmethod
+    def get_db_file_path(cls, category: str, filename: str) -> str:
+        return os.path.join(cls.get_db_path(), category, filename)
+
+    @classmethod
+    def get_article_views_db_path(cls) -> str:
+        return cls.get_db_file_path('content', 'article_views.json')
 
     @classmethod
     def get_www_path(cls) -> str:
         """
         Get the directory that stores static site deployments.
         """
-        www_path = os.environ.get('WWW_PATH', DEFAULT_WWW_PATH)
+        www_path = cls.get_settings().www_path
         return cls.get_abs_path(www_path)

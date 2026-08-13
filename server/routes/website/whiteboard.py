@@ -2,10 +2,10 @@ from pydantic import BaseModel
 from typing import Optional, Any
 from fastapi import HTTPException, Request, status
 from fastapi.routing import APIRouter
-from scripts.db import AuthorizedHandler
-from scripts.whiteboard import WhiteBoardHandler
+from services.website.whiteboard import WhiteboardService
+from routes.dependencies import optional_current_user
 
-WHITEBOARD_ROUTE = APIRouter(prefix="/website/whiteboard", tags=["website-whiteboard"])
+WHITEBOARD_ROUTER = APIRouter(prefix="/website/whiteboard", tags=["website-whiteboard"])
 
 
 """
@@ -15,12 +15,12 @@ Get Whiteboard by Key
 """
 
 
-class GetWhiteBoardByKeyRequest(BaseModel):
+class GetWhiteboardByKeyRequest(BaseModel):
     key: str
 
 
-@WHITEBOARD_ROUTE.post("/key")
-async def api_get_whiteboard_by_key(request: GetWhiteBoardByKeyRequest):
+@WHITEBOARD_ROUTER.post("/key")
+async def api_get_whiteboard_by_key(request: GetWhiteboardByKeyRequest):
     """
     根据键获取白板内容
     """
@@ -30,7 +30,7 @@ async def api_get_whiteboard_by_key(request: GetWhiteBoardByKeyRequest):
             detail="Key is required."
         )
 
-    item = WhiteBoardHandler.get_item_by_key(request.key)
+    item = WhiteboardService.get_item_by_key(request.key)
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -47,28 +47,23 @@ Get Whiteboard by Username
 """
 
 
-class GetWhiteBoardByUsernameRequest(BaseModel):
+class GetWhiteboardByUsernameRequest(BaseModel):
     username: Optional[str] = None
     create_new: bool = True
 
 
-@WHITEBOARD_ROUTE.post("/authorized")
-async def api_get_whiteboard_by_username(request: GetWhiteBoardByUsernameRequest, fastapi_request: Request):
+@WHITEBOARD_ROUTER.post("/authorized")
+async def api_get_whiteboard_by_username(request: GetWhiteboardByUsernameRequest, fastapi_request: Request):
     """
     获取当前用户（或指定用户名）的白板内容列表
     """
     username = (request.username or "").strip()
 
     if not username:
-        try:
-            user = AuthorizedHandler.get_current_user(fastapi_request)
-            username = user.get('username', '') if user else ""
-        except HTTPException as exc:
-            if exc.status_code not in (status.HTTP_401_UNAUTHORIZED, status.HTTP_404_NOT_FOUND):
-                raise
-            username = ""
+        user = optional_current_user(fastapi_request)
+        username = user.get('username', '') if user else ""
 
-    items = WhiteBoardHandler.get_items_by_username(username, create_new=request.create_new)
+    items = WhiteboardService.get_items_by_username(username, create_new=request.create_new)
     if not items:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -100,7 +95,7 @@ class UpdateResponse(BaseModel):
     data: UpdateResponseData
 
 
-@WHITEBOARD_ROUTE.post("/update")
+@WHITEBOARD_ROUTER.post("/update")
 async def api_update_whiteboard_content(request: UpdateRequest) -> UpdateResponse:
     """
     更新白板内容
@@ -111,7 +106,7 @@ async def api_update_whiteboard_content(request: UpdateRequest) -> UpdateRespons
             detail="Key is required."
         )
 
-    created = WhiteBoardHandler.set_content_by_key(request.key, request.content)
+    created = WhiteboardService.set_content_by_key(request.key, request.content)
 
     if not created:
         return UpdateResponse(

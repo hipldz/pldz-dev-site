@@ -1,6 +1,12 @@
 # data/db
 
-This is a placeholder file to prevent the folder from being deleted.
+This directory stores internal, persistent records. These files are
+implementation details and must never be exposed by the raw resource API.
+
+- `content/`: article indexes and comments.
+- `identity/`: users, credentials and authorization state.
+- `analytics/`: analytics events and aggregates.
+- `deployment/`: deployment history.
 
 The `data/db` directory is used to store project database.
 

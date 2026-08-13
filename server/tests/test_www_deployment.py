@@ -31,7 +31,7 @@ def _headers(token: str = "secret") -> dict:
 
 
 def _records(tmp_path: Path) -> list[dict]:
-    with open(tmp_path / "data" / "db" / "www_deployments.json", "r", encoding="utf-8") as file_obj:
+    with open(tmp_path / "data" / "db" / "deployment" / "www_deployments.json", "r", encoding="utf-8") as file_obj:
         return json.load(file_obj)
 
 
@@ -77,9 +77,9 @@ def test_www_deployment_success_replaces_target_and_creates_backup(client, monke
     assert records[-1]["folder"] == "demo"
 
 
-def test_www_deployment_allows_main_web_folder(client, monkeypatch, tmp_path):
+def test_www_deployment_allows_main_website_folder(client, monkeypatch, tmp_path):
     _setup_project(monkeypatch, tmp_path)
-    target = tmp_path / "data" / "www" / "web"
+    target = tmp_path / "data" / "www" / "website"
     target.mkdir(parents=True)
     (target / "index.html").write_text("old", encoding="utf-8")
 
@@ -88,7 +88,7 @@ def test_www_deployment_allows_main_web_folder(client, monkeypatch, tmp_path):
 
     response = client.post(
         "/api/v1/deploy/www/notice",
-        json=_notice_payload(zip_path.as_uri(), folder="web"),
+        json=_notice_payload(zip_path.as_uri(), folder="website"),
         headers=_headers(),
     )
 
@@ -97,7 +97,7 @@ def test_www_deployment_allows_main_web_folder(client, monkeypatch, tmp_path):
     assert (target / "assets" / "app.js").is_file()
     records = _records(tmp_path)
     assert records[-1]["status"] == "success"
-    assert records[-1]["folder"] == "web"
+    assert records[-1]["folder"] == "website"
 
 
 def test_www_deployment_extracts_single_nested_archive(client, monkeypatch, tmp_path):
@@ -198,11 +198,11 @@ def test_www_deployment_rejects_missing_index(client, monkeypatch, tmp_path):
 
 
 def test_www_deployment_builds_github_artifact_api_request(monkeypatch):
-    from scripts.filesystem import WwwDeployHandler
+    from services.operations.deployment import DeploymentService
 
     monkeypatch.setenv("DEPLOY_GITHUB_TOKEN", "github-token")
 
-    request = WwwDeployHandler._build_github_artifact_request(
+    request = DeploymentService._build_github_artifact_request(
         "https://github.com/acme/demo/actions/runs/123/artifacts/456"
     )
 
@@ -212,17 +212,17 @@ def test_www_deployment_builds_github_artifact_api_request(monkeypatch):
 
 def test_www_deployment_retry_creates_new_record(monkeypatch, tmp_path):
     from core import ProjectConfig
-    from scripts.filesystem import WwwDeployHandler
+    from services.operations.deployment import DeploymentService
 
     monkeypatch.setattr(ProjectConfig, "PROJECT_ROOT", str(tmp_path))
     (tmp_path / "data" / "db").mkdir(parents=True, exist_ok=True)
 
-    original = WwwDeployHandler.create_record({
+    original = DeploymentService.create_record({
         "folder": "demo",
         "artifact_url": "file:///tmp/site.zip",
     })
 
-    retry = WwwDeployHandler.retry_record(original["id"])
+    retry = DeploymentService.retry_record(original["id"])
 
     assert retry["id"] != original["id"]
     assert retry["artifact_url"] == original["artifact_url"]

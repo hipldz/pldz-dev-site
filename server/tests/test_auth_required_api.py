@@ -3,43 +3,47 @@
 
 
 def test_cache_all_requires_login(client):
-    assert_requires_login(client.get("/api/v1/resource/cache/all"))
+    assert_requires_login(client.get("/api/v1/cache/all"))
 
 
 def test_cache_delete_requires_login(client):
     assert_requires_login(
-        client.post("/api/v1/resource/cache/delete", json={"filename": "x.txt"})
+        client.post("/api/v1/cache/delete", json={"filename": "x.txt"})
     )
 
 
 def test_cache_download_requires_login(client):
     assert_requires_login(
-        client.post("/api/v1/resource/cache/download", json={"filename": "x.txt"})
+        client.post("/api/v1/cache/download", json={"filename": "x.txt"})
     )
 
 
 def test_cache_upload_requires_login(client):
     assert_requires_login(
         client.post(
-            "/api/v1/resource/cache/upload",
+            "/api/v1/cache/upload",
             files={"file": ("x.txt", b"hello", "text/plain")},
         )
     )
 
 
 def test_cache_file_get_requires_machine_token(client):
-    assert client.get("/api/v1/resource/cache/files/x.txt").status_code == 403
+    assert client.get("/api/v1/cache/files/x.txt").status_code == 403
 
 
 def test_cache_file_put_requires_machine_token(client):
     assert (
         client.put(
-            "/api/v1/resource/cache/files/x.txt",
+            "/api/v1/cache/files/x.txt",
             content=b"hello",
             headers={"content-length": "5"},
         ).status_code
         == 403
     )
+
+
+def test_cache_raw_requires_admin(client):
+    assert_requires_login(client.get("/api/v1/cache/raw/x.txt"))
 
 
 def test_livedemo_set_requires_login(client):

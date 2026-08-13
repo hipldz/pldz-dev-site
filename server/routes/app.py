@@ -1,20 +1,20 @@
-import os
 from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+
+from core import ProjectConfig
 
 
-from .authorization import AUTH_ROUTER
-from .resource import RESOURCE_ROUTE
-from .analytics import ANALYTICS_ROUTER
-from .deploy import WWW_DEPLOY_ROUTER
+from .identity import AUTH_ROUTER
+from .operations import CACHE_ROUTER, WWW_DEPLOY_ROUTER
 from .website import (
-    ARTICLES_ROUTE,
-    IMAGES_ROUTE,
-    COMMENTS_ROUTE,
-    WHITEBOARD_ROUTE,
+    ANALYTICS_ROUTER,
+    RESOURCE_ROUTER,
+    ARTICLES_ROUTER,
+    IMAGES_ROUTER,
+    COMMENTS_ROUTER,
+    WHITEBOARD_ROUTER,
     LIVEDEMO_ROUTER,
 )
 
@@ -29,37 +29,22 @@ app = FastAPI(lifespan=lifespan)
 # 挂载路由
 
 app.include_router(AUTH_ROUTER, prefix="/api/v1")
-app.include_router(RESOURCE_ROUTE, prefix="/api/v1")
+app.include_router(CACHE_ROUTER, prefix="/api/v1")
+app.include_router(RESOURCE_ROUTER, prefix="/api/v1")
 app.include_router(ANALYTICS_ROUTER, prefix="/api/v1")
 app.include_router(WWW_DEPLOY_ROUTER, prefix="/api/v1")
 
-app.include_router(ARTICLES_ROUTE, prefix="/api/v1")
-app.include_router(IMAGES_ROUTE, prefix="/api/v1")
-app.include_router(COMMENTS_ROUTE, prefix="/api/v1")
-app.include_router(WHITEBOARD_ROUTE, prefix="/api/v1")
+app.include_router(ARTICLES_ROUTER, prefix="/api/v1")
+app.include_router(IMAGES_ROUTER, prefix="/api/v1")
+app.include_router(COMMENTS_ROUTER, prefix="/api/v1")
+app.include_router(WHITEBOARD_ROUTER, prefix="/api/v1")
 app.include_router(LIVEDEMO_ROUTER, prefix="/api/v1")
-
-
-def start_dev():
-    '''
-    设置开发模式下的一些web server的配置
-    '''
-    app.add_middleware(
-        CORSMiddleware,
-        allow_credentials=True,   # 允许携带 Cookie
-        allow_origin_regex=".*",  # 允许所有域名（解决 credentials 不能使用 "*" 的问题）
-        allow_methods=["*"],      # 允许所有 HTTP 方法
-        allow_headers=["*"],      # 允许所有 HTTP 头部
-    )
 
 
 def run_dev():
     '''
     启动fastapi webserver 服务
     '''
-    start_dev()
+    settings = ProjectConfig.get_settings()
 
-    host = os.environ.get('SITE_HOST', "127.0.0.1")
-    port = int(os.environ.get('SITE_PORT', 10058))
-
-    uvicorn.run(app, host=host, port=port)
+    uvicorn.run(app, host=settings.site_host, port=settings.site_port)
