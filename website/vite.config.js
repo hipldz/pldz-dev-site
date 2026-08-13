@@ -27,6 +27,5 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false,
     reportCompressedSize: false,
-    outDir: '../data/www/website'
   },
 });
