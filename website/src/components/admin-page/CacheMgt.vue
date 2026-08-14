@@ -1,8 +1,8 @@
 <template>
   <div class="content-container">
     <div class="content-header">
-      <h1>缓存资源管理</h1>
-      <p>上传、下载或清理站点缓存资源文件</p>
+      <h1>缓存文件</h1>
+      <p>浏览 data/cache 下的分类文件，复制公开 URL 或执行维护操作</p>
     </div>
 
     <div class="progress-toast-container" v-if="activeTransfers.length">
@@ -23,6 +23,20 @@
         <button class="btn btn-primary" @click="onUploadCacheFile" :disabled="isCacheLoading">上传</button>
       </div>
 
+      <div class="content-item filter-bar">
+        <span>筛选文件</span>
+        <select v-model="selectedCategory" :disabled="isCacheLoading">
+          <option value="">全部分类</option>
+          <option v-for="category in categories" :key="category" :value="category">
+            {{ category }}
+          </option>
+        </select>
+        <input v-model.trim="keyword" type="search" placeholder="搜索路径或文件名" />
+        <button class="btn btn-outline" type="button" @click="onSelectCacheManagement" :disabled="isCacheLoading">
+          刷新
+        </button>
+      </div>
+
       <div v-if="isCacheLoading" class="loading-stack">
         <div v-for="n in 5" :key="`cache-skeleton-${n}`" class="loading-card">
           <div class="skeleton-line w-60"></div>
@@ -30,9 +44,12 @@
         </div>
       </div>
 
-      <div v-else-if="cacheMgt.length" class="list-block">
-        <div class="list-row" v-for="(cache, index) in cacheMgt" :key="`cache-${index}`">
-          <strong class="file-title">{{ cache.filename }}</strong>
+      <div v-else-if="filteredCache.length" class="list-block">
+        <div class="list-row" v-for="cache in filteredCache" :key="cache.filename">
+          <div class="file-title">
+            <span class="category-badge">{{ cache.category || "根目录" }}</span>
+            <strong>{{ cache.filename }}</strong>
+          </div>
           <div class="field">
             <span class="field-label">更新时间</span>
             <span class="field-value field-value--muted">{{ cache.modified_time }}</span>
@@ -42,7 +59,7 @@
             <span class="field-value field-value--muted">{{ formatFileSize(cache.size) }}</span>
           </div>
           <div class="inline-actions">
-            <button class="btn btn-outline" @click="onCopyRawCacheLink(cache)">复制管理链接</button>
+            <button class="btn btn-outline" @click="onCopyCacheLink(cache)">复制 URL</button>
             <button class="btn btn-info" @click="onDownloadCacheFile(cache)">下载</button>
             <button class="btn btn-danger" @click="onDeleteCacheFile(cache)">删除</button>
           </div>
@@ -51,7 +68,7 @@
 
       <div v-else class="empty-state">
         <div class="empty-icon">📂</div>
-        <p>暂无缓存资源文件。</p>
+        <p>{{ cacheMgt.length ? "没有符合筛选条件的缓存文件。" : "暂无缓存文件。" }}</p>
         <button class="btn btn-outline" @click="onSelectCacheManagement" :disabled="isCacheLoading">刷新</button>
       </div>
     </div>
@@ -59,14 +76,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, computed } from "vue";
+import { ref, onMounted, reactive, computed, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getAllCache, deleteCacheFile } from "../../utils/apis";
 import { uploadCacheFile } from "../../utils/file-upload.js";
+import { buildPublicFileUrl, copyText } from "../../utils/clipboard.js";
 import Toast from "../../utils/toast.js";
 import { useLoading } from "../../utils/use-loading";
 
 const errorMessage = ref("");
 const cacheMgt = ref([]);
+const route = useRoute();
+const router = useRouter();
+const selectedCategory = ref(typeof route.query.category === "string" ? route.query.category : "");
+const keyword = ref("");
 const transferProgress = reactive({});
 const { isLoading: isCacheLoading, start: startCacheLoading, stop: stopCacheLoading } = useLoading("admin.cache.list");
 
@@ -74,6 +97,37 @@ const activeTransfers = computed(() =>
   Object.entries(transferProgress)
     .filter(([, item]) => item.state !== "hidden")
     .map(([name, item]) => ({ name, ...item }))
+);
+
+const categories = computed(() =>
+  [...new Set(cacheMgt.value.map((file) => file.category).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b)
+  )
+);
+
+const filteredCache = computed(() => {
+  const query = keyword.value.toLocaleLowerCase();
+  return cacheMgt.value.filter((file) => {
+    if (selectedCategory.value && file.category !== selectedCategory.value) return false;
+    return !query || file.filename.toLocaleLowerCase().includes(query);
+  });
+});
+
+watch(selectedCategory, (category) => {
+  const currentCategory = typeof route.query.category === "string" ? route.query.category : "";
+  if (category === currentCategory) return;
+  const query = { ...route.query };
+  if (category) query.category = category;
+  else delete query.category;
+  router.replace({ query });
+});
+
+watch(
+  () => route.query.category,
+  (category) => {
+    const nextCategory = typeof category === "string" ? category : "";
+    if (nextCategory !== selectedCategory.value) selectedCategory.value = nextCategory;
+  }
 );
 
 async function onDeleteCacheFile(file) {
@@ -152,46 +206,16 @@ async function onDownloadCacheFile(fileObj) {
   }
 }
 
-async function onCopyRawCacheLink(fileObj) {
-  const link = buildRawCacheUrl(fileObj.filename);
+async function onCopyCacheLink(fileObj) {
+  const link = buildPublicFileUrl("cache", fileObj.filename);
   try {
     await copyText(link);
-    Toast.success("Raw 链接已复制");
+    Toast.success("缓存 URL 已复制");
     errorMessage.value = "";
   } catch (err) {
-    console.error("复制 Raw 链接失败:", err);
-    errorMessage.value = "复制 Raw 链接失败，请手动复制";
-    Toast.error("复制 Raw 链接失败");
-  }
-}
-
-function buildRawCacheUrl(filename) {
-  const encodedPath = String(filename)
-    .split("/")
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
-  return new URL(`/api/v1/cache/raw/${encodedPath}`, window.location.origin).href;
-}
-
-async function copyText(text) {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "");
-  textarea.style.position = "fixed";
-  textarea.style.left = "-9999px";
-  textarea.style.top = "0";
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  const copied = document.execCommand("copy");
-  document.body.removeChild(textarea);
-  if (!copied) {
-    throw new Error("execCommand copy failed");
+    console.error("复制缓存 URL 失败:", err);
+    errorMessage.value = "复制缓存 URL 失败，请手动复制";
+    Toast.error("复制缓存 URL 失败");
   }
 }
 
@@ -444,7 +468,22 @@ function formatFileSize(bytes) {
 }
 
 .file-title {
-  min-width: 260px;
+  min-width: 280px;
+  flex: 1 1 340px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+
+.category-badge {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent-weak);
+  color: var(--app-blue);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .inline-actions {
@@ -453,6 +492,11 @@ function formatFileSize(bytes) {
 }
 
 @media (max-width: 768px) {
+  .filter-bar input,
+  .filter-bar select {
+    width: 100%;
+  }
+
   .progress-toast-container {
     top: auto;
     bottom: 24px;

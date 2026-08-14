@@ -1,11 +1,13 @@
 import os
 from html import escape
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import FileResponse, HTMLResponse
 
 from core import Logger, ProjectConfig
+from routes.dependencies import current_user, ensure_admin_user
 from routes.path_utils import resolve_safe_file_path
+from storage.resource.files import ResourceFileStore
 
 
 WEBSITE_RESOURCE_ROUTER = APIRouter()
@@ -55,9 +57,19 @@ async def get_user_agreement():
     return _legal_response("user_agreement.txt", "用户协议")
 
 
-@WEBSITE_RESOURCE_ROUTER.get("/raw/{file_path:path}")
-async def get_raw_resource(file_path: str):
-    """Return a public resource file, never a DB file."""
+@WEBSITE_RESOURCE_ROUTER.get("/all")
+async def get_all_resources(user: dict = Depends(current_user)):
+    ensure_admin_user(
+        user,
+        login_detail="You must be logged in to list resource files.",
+        forbidden_detail="You do not have permission to list resource files.",
+    )
+    return {"data": ResourceFileStore.list_files()}
+
+
+@WEBSITE_RESOURCE_ROUTER.get("/{file_path:path}")
+async def get_resource(file_path: str):
+    """Return a public resource file."""
     normalized_path, target_path = resolve_safe_file_path(
         ProjectConfig.get_resource_path(), file_path, "File path must be provided."
     )

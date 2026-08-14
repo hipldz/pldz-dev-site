@@ -46,6 +46,7 @@
           <UserMgt v-if="activeMenuKey === 'usermgt'"></UserMgt>
           <SecurityMgt v-if="activeMenuKey === 'security'"></SecurityMgt>
           <ImageMgt v-if="activeMenuKey === 'imagemgt'" :all-categories="allCategories" :is-loading="isCategoriesLoading"></ImageMgt>
+          <ResourceMgt v-if="activeMenuKey === 'resourcemgt'"></ResourceMgt>
           <CacheMgt v-if="activeMenuKey === 'cachemgt'"></CacheMgt>
           <WwwDeployMgt v-if="activeMenuKey === 'wwwdeploy'"></WwwDeployMgt>
         </section>
@@ -69,6 +70,7 @@ import MobileDrawer from "../components/MobileDrawer.vue";
 import AnalyticsMgt from "../components/admin-page/AnalyticsMgt.vue";
 import UserMgt from "../components/admin-page/UserMgt.vue";
 import ImageMgt from "../components/admin-page/ImageMgt.vue";
+import ResourceMgt from "../components/admin-page/ResourceMgt.vue";
 import CacheMgt from "../components/admin-page/CacheMgt.vue";
 import SecurityMgt from "../components/admin-page/SecurityMgt.vue";
 import WwwDeployMgt from "../components/admin-page/WwwDeployMgt.vue";
@@ -122,10 +124,18 @@ const menuItems = [
     requiresCategories: true,
   },
   {
+    key: "resourcemgt",
+    name: "资源文件",
+    icon: "folder",
+    caption: "浏览 Resource 分类并复制公开 URL",
+    gradient: "linear-gradient(135deg, #6b9073 0%, #7b5e4e 100%)",
+    requiresCategories: false,
+  },
+  {
     key: "cachemgt",
-    name: "缓存资源管理",
+    name: "缓存文件",
     icon: "cache",
-    caption: "维护静态缓存与资源文件",
+    caption: "浏览、上传、下载和清理缓存文件",
     gradient: "linear-gradient(135deg, #b57652 0%, #7b5e4e 100%)",
     requiresCategories: false,
   },

@@ -17,16 +17,22 @@ pip-delete-this-directory.txt
 .bin/
 
 # Do not track user avatar
-data/templates/**/*.db
 data/cache/**
 !data/cache/README.md
 !data/cache/webp/
 data/cache/webp/**
 !data/cache/webp/README.md
+
+data/resources/**
+!data/resources/README.md
+!data/resources/website/
+!data/resources/website/**
+
 data/db/*.json
 data/db/**/*.json
 data/db/**/*.tmp
 data/db/*.lock
+
 data/www
 
 # Python REPL 历史记录

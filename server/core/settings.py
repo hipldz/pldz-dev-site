@@ -32,8 +32,6 @@ class Settings:
     deploy_notice_token: str
     deploy_github_token: str
     deploy_max_artifact_bytes: int
-    deploy_http_proxy: str
-    deploy_https_proxy: str
     cache_api_token: str
 
     secret_key: str
@@ -99,8 +97,6 @@ class Settings:
             "deploy_notice_token": text("DEPLOY_NOTICE_TOKEN", report_missing=False),
             "deploy_github_token": text("DEPLOY_GITHUB_TOKEN", report_missing=False),
             "deploy_max_artifact_bytes": positive_int("DEPLOY_MAX_ARTIFACT_BYTES", 104857600),
-            "deploy_http_proxy": text("DEPLOY_HTTP_PROXY", report_missing=False),
-            "deploy_https_proxy": text("DEPLOY_HTTPS_PROXY", report_missing=False),
             "cache_api_token": text("CACHE_API_TOKEN", report_missing=False),
             "secret_key": text("SECRET_KEY", report_missing=False),
             "access_token_expire_minutes": positive_int("ACCESS_TOKEN_EXPIRE_MINUTES", 30),

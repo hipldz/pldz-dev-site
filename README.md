@@ -185,7 +185,7 @@ CACHE_PATH=data/cache
 WEBP_CACHE_PATH=data/cache/webp
 DB_PATH=data/db
 
-SECRET_KEY=your-super-secret-key
+SECRET_KEY=change-me
 ACCESS_TOKEN_EXPIRE_MINUTES=3600
 REFRESH_TOKEN_EXPIRE_DAYS=7
 
@@ -202,9 +202,13 @@ SITE_PS=京公网安备11xxxxxxxx9号
 DEPLOY_NOTICE_TOKEN=change-me
 DEPLOY_GITHUB_TOKEN=github_pat_xxx
 DEPLOY_MAX_ARTIFACT_BYTES=104857600
-DEPLOY_HTTP_PROXY=
-DEPLOY_HTTPS_PROXY=
 CACHE_API_TOKEN=change-me
+```
+
+JWT 密钥可使用以下命令生成：
+
+```bash
+openssl rand -hex 32
 ```
 
 后端启动时会调用 `ProjectConfig.load_env()`：
@@ -355,7 +359,8 @@ prefix = /api/v1/resource
 | ----- | --------------------------------- | ---- | --------- |
 | `GET` | `/website/legal/privacy-policy`   | 公开 | HTML 页面 |
 | `GET` | `/website/legal/user-agreement`   | 公开 | HTML 页面 |
-| `GET` | `/raw/{file_path}`                | 公开 | Resource 文件 |
+| `GET` | `/all`                           | 管理员 | 递归文件列表 |
+| `GET` | `/{category}/{file_path}`         | 公开 | Resource 文件 |
 
 ### 缓存管理
 
@@ -371,9 +376,9 @@ prefix = /api/v1/cache
 | `POST` | `/download`         | 管理员          | `{ filename }` | 文件下载     |
 | `POST` | `/delete`           | 管理员          | `{ filename }` | `true/false` |
 | `POST` | `/upload`           | 管理员          | multipart file | `true/false` |
-| `GET`  | `/raw/{filename}`   | 管理员          | 无             | 登录态下载链接 |
 | `GET`  | `/files/{filename}` | `X-Cache-Token` | 无             | 机器下载     |
 | `PUT`  | `/files/{filename}` | `X-Cache-Token` | 原始文件请求体 | 流式原子上传 |
+| `GET`  | `/{category}/{file_path}` | 公开       | 无             | Cache 文件   |
 
 自动化程序调用 `/api/v1/cache/files/{filename}` 时不需要登录 Cookie，但必须携带
 `X-Cache-Token: <CACHE_API_TOKEN>`；令牌由服务器 `.env` 的 `CACHE_API_TOKEN` 配置。
@@ -791,7 +796,7 @@ website/src/views/AdminPage.vue
 ```text
 /admin/usermgt
 /admin/imagemgt
-/admin/navmgt
+/admin/resourcemgt
 /admin/cachemgt
 ```
 
@@ -807,7 +812,8 @@ website/src/views/AdminPage.vue
 | ---------- | -------------- | -------------------------------------------- |
 | `usermgt`  | `UserMgt.vue`  | 用户列表、删除用户                           |
 | `imagemgt` | `ImageMgt.vue` | 按分类管理文章图片，上传、重命名、下载、删除 |
-| `cachemgt` | `CacheMgt.vue` | 管理缓存文件，上传、下载、删除               |
+| `resourcemgt` | `ResourceMgt.vue` | 浏览 Resource 分类、搜索并复制公开 URL |
+| `cachemgt` | `CacheMgt.vue` | 递归浏览缓存分类，复制 URL、上传、下载、删除 |
 
 ### HeaderBar
 
@@ -1152,7 +1158,6 @@ data/images/live-demo
 
 ```text
 /api/v1/website/image/{category}/{filename}
-/api/v1/website/image/{category}/{filename}@original
 /api/v1/website/image/{category}/{filename}@original
 /api/v1/website/image/{category}/{filename}@{size}
 /api/v1/website/image/{category}/{filename}@{width}x{height}
@@ -1534,6 +1539,21 @@ data/cache
 - 下载。
 - 删除。
 - 查看大小和更新时间。
+- 按分类筛选和搜索完整路径。
+- 复制 `/api/v1/cache/<category>/<path>` 公开 URL。
+- 分类同步到 `?category=<name>`，刷新或分享后台地址时保留筛选状态。
+
+### 管理 Resource 文件
+
+资源管理入口：
+
+```text
+/admin/resourcemgt
+```
+
+支持递归浏览 `data/resources`、按分类筛选、搜索路径，以及复制
+`/api/v1/resource/<category>/<path>` 公开 URL。分类同步到
+`?category=<name>`，刷新页面后仍会保留。
 
 ## 故障排查
 

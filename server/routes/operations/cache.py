@@ -25,11 +25,15 @@ def _ensure_cache_admin(user: dict, action: str) -> None:
     )
 
 
-def _cache_file_response(filename: str) -> FileResponse:
+def _cache_file_response(filename: str, *, download: bool = False) -> FileResponse:
     file_path = CacheStore.get_cache_file(filename)
     if not file_path:
         raise HTTPException(status_code=404, detail=f"Cache file '{filename}' not found.")
-    return FileResponse(file_path, media_type="application/octet-stream", filename=filename)
+    return FileResponse(
+        file_path,
+        media_type="application/octet-stream" if download else None,
+        filename=filename if download else None,
+    )
 
 
 def _parse_content_length(request: Request) -> int:
@@ -61,7 +65,7 @@ async def download_cache_file(payload: CacheDataRequest, user: dict = Depends(cu
     _ensure_cache_admin(user, "download")
     if not payload.filename.strip():
         raise HTTPException(status_code=400, detail="Filename must be provided.")
-    return _cache_file_response(payload.filename.strip())
+    return _cache_file_response(payload.filename.strip(), download=True)
 
 
 @CACHE_ROUTER.get("/files/{filename}")
@@ -86,13 +90,6 @@ async def put_cache_file(
         Logger.error(f"上传缓存文件失败: {error}")
         raise HTTPException(status_code=500, detail="Failed to save cache file.") from error
     return {"data": {"filename": filename, "bytes": written}}
-
-
-@CACHE_ROUTER.get("/raw/{filename}")
-async def get_raw_cache_file(filename: str, user: dict = Depends(current_user)):
-    """Return a root cache file to an authenticated administrator."""
-    _ensure_cache_admin(user, "access")
-    return _cache_file_response(filename)
 
 
 @CACHE_ROUTER.post("/delete")
@@ -121,3 +118,8 @@ async def upload_cache_file(file: UploadFile = File(...), user: dict = Depends(c
     except OSError as error:
         Logger.error(f"上传缓存文件失败: {error}")
         raise HTTPException(status_code=500, detail="Failed to save cache file.") from error
+
+
+@CACHE_ROUTER.get("/{file_path:path}")
+async def get_public_cache_file(file_path: str):
+    return _cache_file_response(file_path)

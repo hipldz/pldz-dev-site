@@ -6,6 +6,10 @@ def test_cache_all_requires_login(client):
     assert_requires_login(client.get("/api/v1/cache/all"))
 
 
+def test_resource_all_requires_login(client):
+    assert_requires_login(client.get("/api/v1/resource/all"))
+
+
 def test_cache_delete_requires_login(client):
     assert_requires_login(
         client.post("/api/v1/cache/delete", json={"filename": "x.txt"})
@@ -40,10 +44,6 @@ def test_cache_file_put_requires_machine_token(client):
         ).status_code
         == 403
     )
-
-
-def test_cache_raw_requires_admin(client):
-    assert_requires_login(client.get("/api/v1/cache/raw/x.txt"))
 
 
 def test_livedemo_set_requires_login(client):

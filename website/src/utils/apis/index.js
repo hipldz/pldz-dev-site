@@ -8,3 +8,4 @@ export * from "./livedemos.js";
 export * from "./whiteboard.js";
 export * from "./analytics.js";
 export * from "./www-deployment.js";
+export * from "./resources.js";

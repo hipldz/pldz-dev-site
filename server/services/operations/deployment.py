@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
-from urllib.request import HTTPRedirectHandler, Request, ProxyHandler, build_opener, url2pathname
+from urllib.request import HTTPRedirectHandler, Request, build_opener, url2pathname
 
 from core import ProjectConfig
 from storage.db.operations.deployment import DeploymentRecordStore
@@ -151,7 +151,7 @@ class DeploymentService:
             logger.add(f"Copied local artifact from {source}.")
         else:
             request = cls._build_github_artifact_request(url)
-            opener = cls._build_url_opener()
+            opener = build_opener(_StripAuthRedirectHandler())
             logger.add(f"Downloading GitHub artifact from {request.full_url}.")
             try:
                 with opener.open(request, timeout=300) as response:
@@ -201,17 +201,6 @@ class DeploymentService:
         if not match:
             raise RuntimeError("Artifact URL must be a GitHub Actions artifact page URL.")
         return match.group("owner"), match.group("repo"), match.group("artifact_id")
-
-    @classmethod
-    def _build_url_opener(cls):
-        proxies = {}
-        http_proxy = os.environ.get("DEPLOY_HTTP_PROXY", "").strip()
-        https_proxy = os.environ.get("DEPLOY_HTTPS_PROXY", "").strip()
-        if http_proxy:
-            proxies["http"] = http_proxy
-        if https_proxy:
-            proxies["https"] = https_proxy
-        return build_opener(ProxyHandler(proxies), _StripAuthRedirectHandler())
 
     @classmethod
     def _stream_response(cls, response, output_path: Path) -> None:

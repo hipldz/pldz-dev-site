@@ -17,8 +17,8 @@ def resolve_safe_file_path(base_path: str, requested_path: str, empty_detail: st
             detail=empty_detail,
         )
 
-    root_path = os.path.abspath(base_path)
-    target_path = os.path.abspath(os.path.join(root_path, normalized_path))
+    root_path = os.path.realpath(base_path)
+    target_path = os.path.realpath(os.path.join(root_path, normalized_path))
     if os.path.commonpath([root_path, target_path]) != root_path:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

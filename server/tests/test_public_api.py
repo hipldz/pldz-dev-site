@@ -150,7 +150,7 @@ def test_livedemo_all(client):
 
 
 def test_resource_raw_file(client):
-    response = client.get("/api/v1/resource/raw/website/config/navigation.json")
+    response = client.get("/api/v1/resource/website/config/navigation.json")
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("application/json")
@@ -171,21 +171,21 @@ def test_resource_user_agreement_page(client):
 
 
 def test_resource_raw_missing_file(client):
-    response = client.get("/api/v1/resource/raw/website/__missing__.json")
+    response = client.get("/api/v1/resource/website/__missing__.json")
 
     assert response.status_code == 404
 
 
 def test_resource_raw_rejects_path_traversal(client):
-    response = client.get("/api/v1/resource/raw/%2E%2E/.env")
+    response = client.get("/api/v1/resource/%2E%2E/.env")
 
     assert response.status_code in (403, 404)
 
 
-def test_cache_raw_missing_file(client):
-    response = client.get("/api/v1/cache/raw/__missing__.txt")
+def test_cache_public_missing_file(client):
+    response = client.get("/api/v1/cache/__missing__.txt")
 
-    assert response.status_code == 401
+    assert response.status_code == 404
 
 
 def test_cache_openapi_uses_top_level_namespace(client):

@@ -17,3 +17,10 @@ def test_cache_machine_api_uploads_and_downloads(client, monkeypatch, tmp_path):
     download = client.get(url, headers={"X-Cache-Token": "cache-secret"})
     assert download.status_code == 200
     assert download.content == b"{}"
+
+    public_file = tmp_path / "llm" / "result.json"
+    public_file.parent.mkdir()
+    public_file.write_bytes(b'{"ok": true}')
+    public_download = client.get("/api/v1/cache/llm/result.json")
+    assert public_download.status_code == 200
+    assert public_download.content == b'{"ok": true}'

@@ -25,29 +25,31 @@ class CacheStore:
     @classmethod
     def _resolve_filename(cls, filename: str) -> Path:
         normalized_filename = filename.strip()
-        if (
-            not normalized_filename
-            or normalized_filename in {".", ".."}
-            or ".." in normalized_filename
-            or "/" in normalized_filename
-            or "\\" in normalized_filename
-            or "\x00" in normalized_filename
-        ):
-            raise ValueError("Filename must be a plain cache file name.")
-        return cls._cache_dir() / normalized_filename
+        if not normalized_filename or normalized_filename in {".", ".."} or "\x00" in normalized_filename:
+            raise ValueError("Cache file path must be provided.")
+
+        root = cls._cache_dir().resolve()
+        target = (root / normalized_filename).resolve()
+        if target == root or root not in target.parents:
+            raise ValueError("Cache file path is outside the cache directory.")
+        return target
 
     @classmethod
     def get_all_cache_files(cls) -> list[dict[str, str | float | int]]:
         """获取所有缓存文件的文件名、修改时间和大小。"""
-        return [
+        files = [
             {
-                "filename": file_path.name,
+                "filename": file_path.relative_to(cls._cache_dir()).as_posix(),
+                "category": file_path.relative_to(cls._cache_dir()).parts[0]
+                if len(file_path.relative_to(cls._cache_dir()).parts) > 1
+                else "",
                 "modified_time": file_path.stat().st_mtime,
                 "size": file_path.stat().st_size,
             }
-            for file_path in cls._cache_dir().iterdir()
-            if file_path.is_file()
+            for file_path in cls._cache_dir().rglob("*")
+            if file_path.is_file() and not file_path.is_symlink()
         ]
+        return sorted(files, key=lambda item: str(item["filename"]).lower())
 
     @classmethod
     def get_cache_file(cls, filename: str) -> str:
@@ -61,7 +63,6 @@ class CacheStore:
         if file_path.is_file():
             return str(file_path)
 
-        Logger.error(f"缓存文件 {filename} 不存在")
         return ""
 
     @classmethod
@@ -104,6 +105,7 @@ class CacheStore:
 
     @classmethod
     def _write_bytes_atomically(cls, file_path: Path, data: bytes) -> None:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
         temporary_file = None
         try:
             with tempfile.NamedTemporaryFile(
@@ -133,6 +135,7 @@ class CacheStore:
             raise ValueError(f"Cache file exceeds the {max_bytes // 1024 // 1024} MB limit.")
 
         file_path = cls._resolve_filename(filename)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
         temporary_file = None
         written = 0
         try:
