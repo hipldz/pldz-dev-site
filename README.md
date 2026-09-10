@@ -194,7 +194,7 @@ ADMIN_PASSWORD=123
 
 SITE_HOST=127.0.0.1
 SITE_PORT=10058
-SITE_NAME=爬楼的猪 Dev
+SITE_NAME=Hi 爬楼的猪
 SITE_COPYRIGHT=©2026 pldz1.com
 SITE_ICP=京ICP备: 180xxxxx号-x
 SITE_PS=京公网安备11xxxxxxxx9号
@@ -221,20 +221,20 @@ openssl rand -hex 32
 
 关键路径的含义：
 
-| 环境变量         | 默认值            | 作用                         |
-| ---------------- | ----------------- | ---------------------------- |
-| `ARTICLES_PATH`  | `data/articles`   | Markdown 文章目录            |
-| `IMAGES_PATH`    | `data/images`     | 图片根目录                   |
-| `WWW_PATH`       | `data/www`       | 前端构建产物和 Demo 模板目录 |
-| `RESOURCES_PATH` | `data/resources`  | 导航、广告、协议等资源配置   |
-| `CACHE_PATH`     | `data/cache`      | 管理后台缓存资源目录         |
-| `WEBP_CACHE_PATH` | `data/cache/webp` | 图片派生缓存目录                  |
-| `DB_PATH`        | `data/db`         | JSON 数据库目录              |
-| `SECRET_KEY`     | 无安全默认值      | JWT 签名密钥                 |
-| `ADMIN_USERNAME` | `admin@pldz1.com` | 管理员账号                   |
-| `ADMIN_PASSWORD` | `123`             | 管理员密码                   |
-| `SITE_HOST`      | `127.0.0.1`       | FastAPI 绑定地址             |
-| `SITE_PORT`      | `10058`           | FastAPI 绑定端口             |
+| 环境变量          | 默认值            | 作用                         |
+| ----------------- | ----------------- | ---------------------------- |
+| `ARTICLES_PATH`   | `data/articles`   | Markdown 文章目录            |
+| `IMAGES_PATH`     | `data/images`     | 图片根目录                   |
+| `WWW_PATH`        | `data/www`        | 前端构建产物和 Demo 模板目录 |
+| `RESOURCES_PATH`  | `data/resources`  | 导航、广告、协议等资源配置   |
+| `CACHE_PATH`      | `data/cache`      | 管理后台缓存资源目录         |
+| `WEBP_CACHE_PATH` | `data/cache/webp` | 图片派生缓存目录             |
+| `DB_PATH`         | `data/db`         | JSON 数据库目录              |
+| `SECRET_KEY`      | 无安全默认值      | JWT 签名密钥                 |
+| `ADMIN_USERNAME`  | `admin@pldz1.com` | 管理员账号                   |
+| `ADMIN_PASSWORD`  | `123`             | 管理员密码                   |
+| `SITE_HOST`       | `127.0.0.1`       | FastAPI 绑定地址             |
+| `SITE_PORT`       | `10058`           | FastAPI 绑定端口             |
 
 ## 后端启动流程
 
@@ -355,12 +355,12 @@ Router:
 prefix = /api/v1/resource
 ```
 
-| 方法  | 路径                              | 权限 | 返回      |
-| ----- | --------------------------------- | ---- | --------- |
-| `GET` | `/website/legal/privacy-policy`   | 公开 | HTML 页面 |
-| `GET` | `/website/legal/user-agreement`   | 公开 | HTML 页面 |
-| `GET` | `/all`                           | 管理员 | 递归文件列表 |
-| `GET` | `/{category}/{file_path}`         | 公开 | Resource 文件 |
+| 方法  | 路径                            | 权限   | 返回          |
+| ----- | ------------------------------- | ------ | ------------- |
+| `GET` | `/website/legal/privacy-policy` | 公开   | HTML 页面     |
+| `GET` | `/website/legal/user-agreement` | 公开   | HTML 页面     |
+| `GET` | `/all`                          | 管理员 | 递归文件列表  |
+| `GET` | `/{category}/{file_path}`       | 公开   | Resource 文件 |
 
 ### 缓存管理
 
@@ -370,15 +370,15 @@ Router:
 prefix = /api/v1/cache
 ```
 
-| 方法   | 路径                | 权限            | 请求体         | 返回         |
-| ------ | ------------------- | --------------- | -------------- | ------------ |
-| `GET`  | `/all`              | 管理员          | 无             | 缓存文件列表 |
-| `POST` | `/download`         | 管理员          | `{ filename }` | 文件下载     |
-| `POST` | `/delete`           | 管理员          | `{ filename }` | `true/false` |
-| `POST` | `/upload`           | 管理员          | multipart file | `true/false` |
-| `GET`  | `/files/{filename}` | `X-Cache-Token` | 无             | 机器下载     |
-| `PUT`  | `/files/{filename}` | `X-Cache-Token` | 原始文件请求体 | 流式原子上传 |
-| `GET`  | `/{category}/{file_path}` | 公开       | 无             | Cache 文件   |
+| 方法   | 路径                      | 权限            | 请求体         | 返回         |
+| ------ | ------------------------- | --------------- | -------------- | ------------ |
+| `GET`  | `/all`                    | 管理员          | 无             | 缓存文件列表 |
+| `POST` | `/download`               | 管理员          | `{ filename }` | 文件下载     |
+| `POST` | `/delete`                 | 管理员          | `{ filename }` | `true/false` |
+| `POST` | `/upload`                 | 管理员          | multipart file | `true/false` |
+| `GET`  | `/files/{filename}`       | `X-Cache-Token` | 无             | 机器下载     |
+| `PUT`  | `/files/{filename}`       | `X-Cache-Token` | 原始文件请求体 | 流式原子上传 |
+| `GET`  | `/{category}/{file_path}` | 公开            | 无             | Cache 文件   |
 
 自动化程序调用 `/api/v1/cache/files/{filename}` 时不需要登录 Cookie，但必须携带
 `X-Cache-Token: <CACHE_API_TOKEN>`；令牌由服务器 `.env` 的 `CACHE_API_TOKEN` 配置。
@@ -549,7 +549,7 @@ Live Demo 项结构：
   "url": "/io/sse-markdown",
   "thumbnail": "/api/v1/website/image/chat-playground/2_markdown_sse_thumbnail.png",
   "previewgif": "/api/v1/website/image/chat-playground/2_sse_md_preview.gif",
-  "sourcelink": "https://github.com/pldz1/demos/tree/main/sse_markdown",
+  "sourcelink": "https://github.com/hipldz/demos/tree/main/sse_markdown",
   "date": "2025-01-15",
   "description": "用 markdown-it 动态更新 markdown 内容。"
 }
@@ -634,17 +634,17 @@ prefix = /api/v1/website/whiteboard
 
 前端使用 HTML5 History 模式。
 
-| 路径                  | 组件                | 说明                                       |
-| --------------------- | ------------------- | ------------------------------------------ |
-| `/`                   | `HomePage.vue`      | 首页                                       |
-| `/articles`           | `TutorialsPage.vue` | 专栏列表，展示所有 `serialNo=0` 的导读文章 |
-| `/articles/:category` | `TutorialsPage.vue` | 某个分类下的系列文章                       |
-| `/article/:id`        | `ArticlePage.vue`   | 文章详情                                   |
-| `/livedemo`           | `LiveDemoPage.vue`  | Demo / 项目预览                            |
-| `/whiteboard`         | `WhiteboardPage.vue` | 临时文本白板                              |
-| `/admin/:id?`         | `AdminPage.vue`     | 管理后台                                   |
-| `/404`                | `NotFound.vue`      | 404 页面                                   |
-| `/:pathMatch(.*)*`    | redirect `/`        | 未匹配路径回首页                           |
+| 路径                  | 组件                 | 说明                                       |
+| --------------------- | -------------------- | ------------------------------------------ |
+| `/`                   | `HomePage.vue`       | 首页                                       |
+| `/articles`           | `TutorialsPage.vue`  | 专栏列表，展示所有 `serialNo=0` 的导读文章 |
+| `/articles/:category` | `TutorialsPage.vue`  | 某个分类下的系列文章                       |
+| `/article/:id`        | `ArticlePage.vue`    | 文章详情                                   |
+| `/livedemo`           | `LiveDemoPage.vue`   | Demo / 项目预览                            |
+| `/whiteboard`         | `WhiteboardPage.vue` | 临时文本白板                               |
+| `/admin/:id?`         | `AdminPage.vue`      | 管理后台                                   |
+| `/404`                | `NotFound.vue`       | 404 页面                                   |
+| `/:pathMatch(.*)*`    | redirect `/`         | 未匹配路径回首页                           |
 
 Nginx 生产配置中：
 
@@ -808,12 +808,12 @@ website/src/views/AdminPage.vue
 
 后台子模块：
 
-| key        | 组件           | 功能                                         |
-| ---------- | -------------- | -------------------------------------------- |
-| `usermgt`  | `UserMgt.vue`  | 用户列表、删除用户                           |
-| `imagemgt` | `ImageMgt.vue` | 按分类管理文章图片，上传、重命名、下载、删除 |
-| `resourcemgt` | `ResourceMgt.vue` | 浏览 Resource 分类、搜索并复制公开 URL |
-| `cachemgt` | `CacheMgt.vue` | 递归浏览缓存分类，复制 URL、上传、下载、删除 |
+| key           | 组件              | 功能                                         |
+| ------------- | ----------------- | -------------------------------------------- |
+| `usermgt`     | `UserMgt.vue`     | 用户列表、删除用户                           |
+| `imagemgt`    | `ImageMgt.vue`    | 按分类管理文章图片，上传、重命名、下载、删除 |
+| `resourcemgt` | `ResourceMgt.vue` | 浏览 Resource 分类、搜索并复制公开 URL       |
+| `cachemgt`    | `CacheMgt.vue`    | 递归浏览缓存分类，复制 URL、上传、下载、删除 |
 
 ### HeaderBar
 
@@ -1112,13 +1112,13 @@ data/db/analytics/analytics.json
 data/db/deployment/www_deployments.json
 ```
 
-| 分类 | 文件 | 说明 |
-| --- | --- | --- |
-| Content | `article_views.json` | 不可从 Markdown 重建的文章浏览量 |
-| Content | `comments.json` | 按文章 ID 分组的评论树 |
-| Identity | `users.json` | 用户、密码 hash、token 和 2FA 状态 |
-| Analytics | `analytics.json` | 统计事件和聚合数据 |
-| Deployment | `www_deployments.json` | WWW 部署历史 |
+| 分类       | 文件                   | 说明                               |
+| ---------- | ---------------------- | ---------------------------------- |
+| Content    | `article_views.json`   | 不可从 Markdown 重建的文章浏览量   |
+| Content    | `comments.json`        | 按文章 ID 分组的评论树             |
+| Identity   | `users.json`           | 用户、密码 hash、token 和 2FA 状态 |
+| Analytics  | `analytics.json`       | 统计事件和聚合数据                 |
+| Deployment | `www_deployments.json` | WWW 部署历史                       |
 
 JSON 数据库访问封装在：
 

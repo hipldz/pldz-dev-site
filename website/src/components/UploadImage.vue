@@ -176,7 +176,7 @@ function onClose() {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(42, 36, 32, 0.45);
+  background-color: var(--app-overlay);
 }
 
 .image-upload-container {
@@ -248,7 +248,7 @@ function onClose() {
 
 .image-upload-item input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 5px rgba(189, 88, 54, 0.35);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .confirm-button {

@@ -106,7 +106,7 @@ class Settings:
             "admin_password": text("ADMIN_PASSWORD", "123", report_missing=False),
             "site_host": text("SITE_HOST", "127.0.0.1"),
             "site_port": positive_int("SITE_PORT", 10058, maximum=65535),
-            "site_name": text("SITE_NAME", "爬楼的猪 Dev"),
+            "site_name": text("SITE_NAME", "Hi 爬楼的猪"),
             "site_copyright": text("SITE_COPYRIGHT", "Copyright信息未设置"),
             "site_icp": text("SITE_ICP", "ICP信息未设置"),
             "site_ps": text("SITE_PS", "PS信息未设置"),

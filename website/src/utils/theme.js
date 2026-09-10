@@ -2,15 +2,17 @@ const THEME_KEY = "pldz-dev-theme";
 const DEFAULT_THEME = "light";
 
 export const themes = [
-  { id: "light", label: "亮色", swatch: "#1a73e8" },
-  { id: "lime", label: "青柠色", swatch: "#10a37f" },
-  { id: "brown", label: "暖棕色", swatch: "#bd5836" },
+  { id: "light", label: "浅色", swatch: "#4f72bf" },
+  { id: "dark", label: "深色", swatch: "#9db5e4" },
 ];
 
 const themeIds = new Set(themes.map((theme) => theme.id));
+const legacyLightThemes = new Set(["gemini", "lime", "gpt", "brown", "claude"]);
 
 export function normalizeTheme(theme) {
-  return themeIds.has(theme) ? theme : DEFAULT_THEME;
+  if (themeIds.has(theme)) return theme;
+  if (legacyLightThemes.has(theme)) return "light";
+  return DEFAULT_THEME;
 }
 
 export function getStoredTheme() {

@@ -8,7 +8,7 @@
             "url": "/io/html2video/",
             "thumbnail": "/api/v1/website/image/live-demo/html-2-tts-video-thumbnail.jpg",
             "previewgif": "/api/v1/website/image/live-demo/html-2-tts-video-preview.gif",
-            "sourcelink": "https://github.com/pldz1/html-edge-tts-video",
+            "sourcelink": "https://github.com/hipldz/html-edge-tts-video",
             "date": "2026-07-16",
             "description": "html转video的工具."
         },
@@ -18,7 +18,7 @@
             "url": "/io/llm/",
             "thumbnail": "/api/v1/website/image/live-demo/ai-api-v001-thumbnail.jpg",
             "previewgif": "/api/v1/website/image/live-demo/ai-api-v001-preview.gif",
-            "sourcelink": "https://github.com/pldz1/ai-api-hub",
+            "sourcelink": "https://github.com/hipldz/ai-api-hub",
             "date": "2026-06-04",
             "description": "用一个工具体验多个AI平台的API"
         },
@@ -28,7 +28,7 @@
             "url": "/io/git-folder-dashboard/",
             "thumbnail": "/api/v1/website/image/2h2g-playbook/git-folder-dashboard-thumbnail.jpg",
             "previewgif": "/api/v1/website/image/live-demo/git-folder-dashboard.gif",
-            "sourcelink": "https://github.com/pldz1/git-folder-dashboard",
+            "sourcelink": "https://github.com/hipldz/git-folder-dashboard",
             "date": "2026-04-28",
             "description": "统一管理多个 Git 仓库的状态和操作的工具"
         },
@@ -38,37 +38,37 @@
             "url": "/io/sse-markdown/",
             "thumbnail": "/api/v1/website/image/chat-playground/2_markdown_sse_thumbnail.png",
             "previewgif": "/api/v1/website/image/chat-playground/2_sse_md_preview.gif",
-            "sourcelink": "https://github.com/pldz1/demos/tree/main/sse_markdown",
+            "sourcelink": "https://github.com/hipldz/demos/tree/main/sse_markdown",
             "date": "2025-01-15",
             "description": "用markdown-it这个库在HTML上动态更新 markdown 内容(不是重新刷新)."
         },
         {
             "title": "chat plaground v1 体验",
             "folder": "chat-playground-v1",
-            "url": "https://github.com/pldz1/chat-playground",
+            "url": "https://github.com/hipldz/chat-playground",
             "thumbnail": "/api/v1/website/image/chat-playground/4_chat-playground_v1_thumbnail.png",
             "previewgif": "/api/v1/website/image/live-demo/chat-playground_v1_preview.gif",
-            "sourcelink": "https://github.com/pldz1/chat-playground",
+            "sourcelink": "https://github.com/hipldz/chat-playground",
             "date": "2025-05-08",
             "description": "在线网页体验chat playground v1的对话和绘图的功能."
         },
         {
             "title": "Vue3 static blog template(A)",
             "folder": "vue3-static-blog-template-a",
-            "url": "https://github.com/pldz1/demos/tree/main/vue3-static-blog-template-a",
+            "url": "https://github.com/hipldz/demos/tree/main/vue3-static-blog-template-a",
             "thumbnail": "/api/v1/website/image/live-demo/v3_sbw_static_website_thumbnail.png",
             "previewgif": "/api/v1/website/image/live-demo/v3_sbw_preview_blog.gif",
-            "sourcelink": "https://github.com/pldz1/demos/tree/main/vue3-static-blog-template-a",
+            "sourcelink": "https://github.com/hipldz/demos/tree/main/vue3-static-blog-template-a",
             "date": "2025-12-14",
             "description": "Vue3创建的静态博客网页模板(A)."
         },
         {
             "title": "Vue3 static blog template(B)",
             "folder": "vue3-static-blog-template-b",
-            "url": "https://github.com/pldz1/demos/tree/main/vue3-static-blog-template-b",
+            "url": "https://github.com/hipldz/demos/tree/main/vue3-static-blog-template-b",
             "thumbnail": "/api/v1/website/image/live-demo/vue3-static-blog-template-b-thumbnail.png",
             "previewgif": "/api/v1/website/image/live-demo/vue3-static-blog-template-b-preview.gif",
-            "sourcelink": "https://github.com/pldz1/demos/tree/main/vue3-static-blog-template-b",
+            "sourcelink": "https://github.com/hipldz/demos/tree/main/vue3-static-blog-template-b",
             "date": "2025-12-14",
             "description": "Vue3创建的静态博客网页模板(B)."
         }

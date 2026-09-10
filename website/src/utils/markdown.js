@@ -87,6 +87,20 @@ function normalizeLanguage(lang = "") {
   return "";
 }
 
+function toOriginalImageUrl(value = "") {
+  const url = String(value || "").trim();
+  if (!url || /^(?:data:|blob:)/i.test(url)) return url;
+
+  const hashIndex = url.indexOf("#");
+  const hash = hashIndex >= 0 ? url.slice(hashIndex) : "";
+  const withoutHash = hashIndex >= 0 ? url.slice(0, hashIndex) : url;
+  const queryIndex = withoutHash.indexOf("?");
+  const query = queryIndex >= 0 ? withoutHash.slice(queryIndex) : "";
+  const path = queryIndex >= 0 ? withoutHash.slice(0, queryIndex) : withoutHash;
+
+  return `${path.endsWith("@original") ? path : `${path}@original`}${query}${hash}`;
+}
+
 export function renderMarkdown(source = "") {
   const markdown = String(source || "");
   const tokens = marked.lexer(markdown, {
@@ -118,15 +132,29 @@ export function renderMarkdown(source = "") {
 
   renderer.link = function ({ href, title, tokens: inlineTokens }) {
     const innerHtml = this.parser.parseInline(inlineTokens);
+
+    // Images render their own original-image link so article lightbox semantics stay consistent.
+    if (Array.isArray(inlineTokens) && inlineTokens.length === 1 && inlineTokens[0]?.type === "image") {
+      return innerHtml;
+    }
+
+    const safeHref = escapeHtml(href || "#");
     const isExternal = /^https?:\/\//i.test(href || "");
-    const titleAttr = title ? ` title="${title}"` : "";
+    const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
     const targetAttr = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
-    return `<a href="${href || "#"}"${titleAttr}${targetAttr}>${innerHtml}</a>`;
+    return `<a href="${safeHref}"${titleAttr}${targetAttr}>${innerHtml}</a>`;
   };
 
   renderer.image = function ({ href, title, text }) {
-    const titleAttr = title ? ` title="${title}"` : "";
-    return `<img src="${href || ""}" alt="${text || ""}" loading="lazy" decoding="async"${titleAttr}>`;
+    const source = String(href || "");
+    const originalSource = toOriginalImageUrl(source);
+    const safeSource = escapeHtml(source);
+    const safeOriginal = escapeHtml(originalSource);
+    const safeAlt = escapeHtml(text || "");
+    const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+    const ariaLabel = escapeHtml(text ? `查看原图：${text}` : "查看文章原图");
+
+    return `<a class="markdown-image-link" href="${safeOriginal}" data-original-src="${safeOriginal}" target="_blank" rel="noopener noreferrer" aria-label="${ariaLabel}"><img src="${safeSource}" alt="${safeAlt}" loading="lazy" decoding="async"${titleAttr}></a>`;
   };
 
   renderer.code = function ({ text, lang }) {

@@ -204,7 +204,7 @@ const ctaRows = computed(() => {
   });
 });
 
-const articlePalette = ["#bd5836", "#7b5e4e", "#b9822f", "#b4472f", "#8b6b5a", "#5d7a4a", "#a48b5c", "#b57652", "#6b6359", "#a44b2b"];
+const articlePalette = ["#4f72bf", "#6f91c8", "#5f82b8", "#7da0c2", "#6f8eae", "#58749c", "#91abc6", "#7188a8", "#9aacc0", "#6683ad"];
 
 function destroyCharts() {
   trafficChart?.destroy();
@@ -259,8 +259,8 @@ function renderCharts() {
           {
             label: "PV",
             data: overview.value.series.pv,
-            borderColor: "#bd5836",
-            backgroundColor: "rgba(189, 88, 54, 0.12)",
+            borderColor: "#4f72bf",
+            backgroundColor: "rgba(82, 103, 232, 0.10)",
             borderWidth: 2,
             tension: 0.32,
             fill: true,
@@ -268,7 +268,7 @@ function renderCharts() {
           {
             label: "UV",
             data: overview.value.series.uv,
-            borderColor: "#7b5e4e",
+            borderColor: "#6f91c8",
             backgroundColor: "rgba(123, 94, 78, 0.12)",
             borderWidth: 2,
             tension: 0.32,
@@ -318,7 +318,7 @@ function renderCharts() {
         datasets: [
           {
             data: [cta.value.clicks || 0, remaining],
-            backgroundColor: ["#bd5836", "#e8e1d4"],
+            backgroundColor: ["#4f72bf", "#e5e8f0"],
             borderColor: "#fffdf8",
             borderWidth: 3,
           },
@@ -451,16 +451,16 @@ onBeforeUnmount(() => {
   gap: 8px;
   padding: 18px;
   border: 1px solid var(--app-border);
-  border-radius: 8px;
-  background: var(--app-surface);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--stat-color, var(--accent)) 7%, var(--app-surface));
 }
 
 .stat-card::before {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: 4px;
-  background: var(--stat-color, var(--app-blue));
+  width: 3px;
+  background: var(--stat-color, var(--accent));
 }
 
 .stat-card:nth-child(1) {
@@ -468,7 +468,7 @@ onBeforeUnmount(() => {
 }
 
 .stat-card:nth-child(2) {
-  --stat-color: var(--accent);
+  --stat-color: var(--brand-support);
 }
 
 .stat-card:nth-child(3) {
@@ -476,7 +476,7 @@ onBeforeUnmount(() => {
 }
 
 .stat-card:nth-child(4) {
-  --stat-color: var(--app-red);
+  --stat-color: var(--brand-support);
 }
 
 .stat-card span {
@@ -505,7 +505,7 @@ onBeforeUnmount(() => {
   min-height: 340px;
   padding: 18px;
   border: 1px solid var(--app-border);
-  border-top: 3px solid var(--panel-accent);
+
   border-radius: 8px;
   background: var(--app-surface);
 }

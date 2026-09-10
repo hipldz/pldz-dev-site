@@ -262,12 +262,12 @@ onBeforeUnmount(() => {
   top: 0;
   left: 0;
   z-index: 10030;
-  min-height: 100vh;
+  height: 100dvh;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(42, 36, 32, 0.45);
+  background: var(--app-overlay);
   overflow: auto;
   padding: 32px 18px;
 }
@@ -304,7 +304,10 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 24px 22px 8px;
+  padding: 28px 28px 20px;
+  margin-bottom: 12px;
+  background: var(--brand-tint);
+  border-bottom: 1px solid var(--accent-line);
 }
 
 .auth-close {
@@ -327,21 +330,22 @@ onBeforeUnmount(() => {
   margin: 0;
   color: var(--app-text);
   font-size: 24px;
-  line-height: 1.1;
-  letter-spacing: 0;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .auth-container form {
-  padding: 0 22px 22px;
+  padding: 0 28px 28px;
 }
 
 .auth-container input {
   width: 100%;
-  height: 44px;
-  padding: 0 12px;
+  height: 48px;
+  padding: 0 14px;
   margin: 10px 0 0;
   border: 1px solid var(--app-border);
-  border-radius: 14px;
+  border-radius: var(--app-radius-md);
   background: var(--app-surface);
   color: var(--app-text);
   font: inherit;
@@ -360,14 +364,14 @@ onBeforeUnmount(() => {
   padding: 0 14px;
   margin-top: 0;
   border: 1px solid transparent;
-  border-radius: 14px;
-  font-weight: 700;
+  border-radius: var(--app-radius-md);
+  font-weight: 500;
   cursor: pointer;
   transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
 }
 
 .auth-container button:hover {
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .auth-container button:active {
@@ -390,7 +394,7 @@ onBeforeUnmount(() => {
 .auth-container .btn-login {
   background: var(--app-blue);
   color: var(--app-surface);
-  box-shadow: 0 10px 24px rgba(80, 55, 35, 0.16);
+  box-shadow: var(--app-shadow-button);
 }
 
 .auth-container .error {
@@ -398,7 +402,7 @@ onBeforeUnmount(() => {
   padding: 0 22px;
   color: var(--app-red);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .auth-container .agreement {
@@ -410,7 +414,7 @@ onBeforeUnmount(() => {
 
 .auth-container .agreement a {
   color: var(--app-blue);
-  font-weight: 700;
+  font-weight: 500;
   text-decoration: none;
 }
 
@@ -418,7 +422,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  padding: 0 22px 22px;
+  padding: 0 28px 28px;
 }
 
 .profile-panel {
@@ -456,12 +460,12 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-  background: rgba(120, 105, 85, 0.45);
+  background: color-mix(in srgb, var(--app-text) 42%, transparent);
   color: var(--app-surface);
   border: none;
   opacity: 0;
   transition: opacity 0.2s ease;
-  font-weight: 700;
+  font-weight: 500;
   user-select: none;
   cursor: pointer;
 }
@@ -489,7 +493,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   color: var(--app-text);
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -515,7 +519,7 @@ onBeforeUnmount(() => {
   background: var(--accent-weak);
   color: var(--app-blue);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   white-space: nowrap;
 }
 
@@ -535,21 +539,21 @@ onBeforeUnmount(() => {
   min-height: 40px;
   padding: 0 13px;
   border: 1px solid transparent;
-  border-radius: 14px;
+  border-radius: var(--app-radius-md);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .profile-actions button:hover {
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .btn-profile-primary {
   background: var(--app-blue);
   color: var(--app-surface);
-  box-shadow: 0 10px 24px rgba(80, 55, 35, 0.16);
+  box-shadow: var(--app-shadow-button);
 }
 
 .btn-profile-secondary {
@@ -586,7 +590,7 @@ onBeforeUnmount(() => {
     flex-direction: column;
   }
 
-  .auth-container button {
+  .auth-container .action-buttons button {
     width: 100%;
   }
 
@@ -603,4 +607,29 @@ onBeforeUnmount(() => {
     grid-column: auto;
   }
 }
+
+@media (max-width: 768px) {
+  .auth-container input { font-size: 16px; }
+}
+
+/* v4.1 · auth modal on phones */
+@media (max-width: 640px) {
+  .auth-overlay {
+    align-items: flex-end !important;
+    padding: 68px 8px 8px !important;
+  }
+  .auth-container, .info-card {
+    width: 100% !important;
+    max-height: calc(100dvh - 76px) !important;
+    overflow-y: auto !important;
+    border-radius: 22px !important;
+  }
+  .auth-header { padding: 20px 18px 16px !important; margin-bottom: 6px !important; }
+  .auth-container form { padding: 0 18px 20px !important; }
+  .auth-container .error { padding-inline: 18px !important; }
+  .info-card { padding: 0 18px 20px !important; }
+  .auth-container input { height: 50px !important; font-size: 16px !important; }
+  .auth-container button { min-height: 46px !important; }
+}
+
 </style>

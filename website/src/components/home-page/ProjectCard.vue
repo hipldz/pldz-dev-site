@@ -42,7 +42,7 @@ defineProps({
 }
 
 .project-card:hover {
-  transform: translateY(-1px);
+  transform: none;
   box-shadow: var(--app-shadow-md);
   border-color: var(--app-border-strong);
   background: var(--app-surface);

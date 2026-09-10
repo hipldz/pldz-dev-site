@@ -7,6 +7,7 @@ import { createApp } from "vue";
 import { refresh } from "./utils/apis";
 import { initAnalytics } from "./utils/analytics";
 import { initTheme } from "./utils/theme";
+import { burst, cursor, depth, field, magnetic, reveal, spotlight } from "./utils/motion";
 
 const refreshAuthState = async () => {
   try {
@@ -33,6 +34,13 @@ const bootstrap = () => {
     window.loading?.set(98);
 
     const app = createApp(App);
+    app.directive("reveal", reveal);
+    app.directive("spotlight", spotlight);
+    app.directive("depth", depth);
+    app.directive("field", field);
+    app.directive("magnetic", magnetic);
+    app.directive("burst", burst);
+    app.directive("cursor", cursor);
     app.use(store);
     app.use(router);
     app.mount("#app");
@@ -44,9 +52,9 @@ const bootstrap = () => {
   }
 };
 
-// 等页面资源加载完后再启动
-if (document.readyState === "complete") {
-  bootstrap();
+// Mount as soon as the DOM is ready. Images and embeds can continue loading lazily.
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootstrap, { once: true });
 } else {
-  window.addEventListener("load", bootstrap, { once: true });
+  bootstrap();
 }

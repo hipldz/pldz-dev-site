@@ -242,7 +242,7 @@ onMounted(async () => {
 .user-card:hover {
   border-color: var(--app-border-strong);
   box-shadow: var(--app-shadow-md);
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .user-card-main {

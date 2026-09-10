@@ -13,7 +13,9 @@
             <div v-if="subtitle" class="mobile-drawer__subtitle">{{ subtitle }}</div>
           </div>
         </div>
-        <button class="mobile-drawer__close" type="button" @click="onClose">×</button>
+        <button class="mobile-drawer__close" type="button" aria-label="关闭导航" @click="onClose">
+          <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        </button>
       </header>
 
       <div class="mobile-drawer__body">
@@ -36,7 +38,7 @@ const props = defineProps({
   },
   title: {
     type: String,
-    default: "爬楼的猪 Dev",
+    default: "Hi 爬楼的猪",
   },
   subtitle: {
     type: String,
@@ -48,7 +50,7 @@ const props = defineProps({
   },
   closeAtWidth: {
     type: Number,
-    default: 768,
+    default: 840,
   },
 });
 
@@ -58,10 +60,15 @@ function onClose() {
   emit("update:modelValue", false);
 }
 
+function isDrawerViewport() {
+  // Keep touch tablets in the mobile drawer mode, while a narrow desktop
+  // window with a fine pointer keeps the desktop navigation contract.
+  if (props.closeAtWidth !== 840) return window.innerWidth <= props.closeAtWidth;
+  return Boolean(window.matchMedia?.("(max-width: 700px), (max-width: 840px) and (pointer: coarse)").matches);
+}
+
 function handleResize() {
-  if (window.innerWidth > props.closeAtWidth && props.modelValue) {
-    onClose();
-  }
+  if (!isDrawerViewport() && props.modelValue) onClose();
 }
 
 onMounted(() => {
@@ -78,7 +85,7 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 70;
-  background: rgba(42, 36, 32, 0.45);
+  background: var(--app-overlay);
 }
 
 .mobile-drawer {
@@ -98,7 +105,7 @@ onBeforeUnmount(() => {
   -webkit-overflow-scrolling: touch;
 }
 
-@media (max-width: 840px) {
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
   .mobile-drawer-overlay {
     top: 64px;
   }
@@ -162,9 +169,18 @@ onBeforeUnmount(() => {
   border-radius: 999px;
   background: var(--app-surface);
   color: var(--app-text-muted);
+  display: grid;
+  place-items: center;
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
+}
+.mobile-drawer__close .material-symbols-rounded {
+  font-size: 20px;
+}
+.mobile-drawer__close:hover {
+  background: var(--app-surface-sunken);
+  color: var(--app-text);
 }
 
 .mobile-drawer__body {
@@ -199,12 +215,42 @@ onBeforeUnmount(() => {
 
 .mobile-drawer-slide-enter-active,
 .mobile-drawer-slide-leave-active {
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
 }
 
 .mobile-drawer-slide-enter-from,
 .mobile-drawer-slide-leave-to {
   opacity: 0;
   transform: translateX(-18px);
+}
+
+/* v4.1 · mobile drawer as a proper navigation surface */
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
+  .mobile-drawer-overlay {
+    top: 60px !important;
+    z-index: 10001 !important;
+  }
+  .mobile-drawer {
+    top: 60px !important;
+    z-index: 10002 !important;
+    width: min(88vw, 340px) !important;
+    border-radius: 0 22px 0 0;
+  }
+  .mobile-drawer__header {
+    padding: 18px 16px 14px;
+  }
+  .mobile-drawer__close {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  .mobile-drawer__body {
+    padding: 8px 12px 24px;
+  }
+  .mobile-drawer__extra {
+    font-size: 13px;
+    line-height: 1.65;
+  }
 }
 </style>

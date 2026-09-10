@@ -45,7 +45,7 @@ const formattedDate = computed(() => (props.item.date || "").replaceAll("-", "."
   height: 28px;
   padding: 0 10px;
   border-radius: 999px;
-  background: rgba(120, 105, 85, 0.08);
+  background: var(--app-hover-bg);
   color: var(--app-text-muted);
   font-size: 12px;
   text-transform: lowercase;
@@ -67,7 +67,7 @@ const formattedDate = computed(() => (props.item.date || "").replaceAll("-", "."
   font-weight: 600;
 }
 
-@media (max-width: 840px) {
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
   .timeline-link {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: start;

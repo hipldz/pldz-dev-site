@@ -4,7 +4,7 @@
       <div class="footer-copy">
         <span>{{ privacyData.copyright }}</span>
         <span class="footer-divider"></span>
-        <span>爬楼的猪 Dev</span>
+        <span>Hi 爬楼的猪</span>
       </div>
 
       <div class="footer-links">
@@ -31,20 +31,20 @@ onMounted(async () => {
 
 <style scoped>
 .footer {
-  padding: 8px 0 28px;
+  padding: 16px 0 32px;
 }
 
 .footer-inner {
-  width: min(1180px, calc(100% - 32px));
+  width: min(var(--app-page-width), calc(100% - 2 * var(--app-page-gutter)));
   margin: 0 auto;
-  padding: 20px 0 0;
+  padding: 24px 0 0;
   border-top: 1px solid var(--app-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   color: var(--app-text-soft);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .footer-copy,
@@ -59,7 +59,7 @@ onMounted(async () => {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: rgba(120, 105, 85, 0.3);
+  background: var(--app-border-strong);
 }
 
 .footer-links a {
@@ -71,9 +71,9 @@ onMounted(async () => {
   color: var(--app-blue);
 }
 
-@media (max-width: 840px) {
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
   .footer-inner {
-    width: min(100%, calc(100% - 24px));
+    width: min(var(--app-page-width), calc(100% - 2 * var(--app-page-gutter)));
     flex-direction: column;
     align-items: flex-start;
   }
@@ -81,7 +81,41 @@ onMounted(async () => {
 
 @media (max-width: 640px) {
   .footer-inner {
-    width: min(100%, calc(100% - 16px));
+    width: min(var(--app-page-width), calc(100% - 2 * var(--app-page-gutter)));
+  }
+}
+
+/* v4.0 · Footer alignment */
+.footer-inner {
+  min-height: 58px;
+  padding-top: 20px;
+  line-height: 1.5;
+}
+.footer-copy,
+.footer-links {
+  gap: 10px 12px;
+}
+
+/* v4.1 · mobile footer */
+@media (max-width: 640px) {
+  .footer {
+    padding: 8px 0 24px;
+  }
+  .footer-inner {
+    width: calc(100% - 28px) !important;
+    min-height: 0 !important;
+    padding-top: 18px !important;
+    gap: 10px !important;
+    font-size: 11px !important;
+  }
+  .footer-copy,
+  .footer-links {
+    width: 100%;
+    gap: 7px 10px !important;
+  }
+  .footer-links {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 </style>

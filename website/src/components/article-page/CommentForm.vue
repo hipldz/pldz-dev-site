@@ -394,7 +394,7 @@ textarea {
 textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(189, 88, 54, 0.2);
+  box-shadow: 0 0 0 3px var(--accent-weak);
 }
 
 textarea:disabled {
@@ -455,7 +455,7 @@ textarea:disabled {
   font-size: 14px;
   font-weight: 500;
   color: var(--app-surface);
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  background: var(--accent);
   border: none;
   border-radius: var(--app-radius-sm);
   cursor: pointer;
@@ -469,9 +469,9 @@ textarea:disabled {
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(189, 88, 54, 0.28);
+  background: var(--accent-hover);
+  transform: none;
+  box-shadow: var(--app-shadow-sm);
 }
 
 .comments-list {
@@ -653,5 +653,9 @@ textarea:disabled {
 .empty-comments p {
   margin: 0;
   font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  textarea { font-size: 16px; }
 }
 </style>

@@ -96,7 +96,7 @@ const menuItems = [
     name: "数据统计",
     icon: "chart",
     caption: "查看 PV/UV、文章点击和按钮点击",
-    gradient: "linear-gradient(135deg, #bd5836 0%, #5d7a4a 100%)",
+    gradient: "linear-gradient(135deg, #4f72bf 0%, #78a7cf 100%)",
     requiresCategories: false,
   },
   {
@@ -104,7 +104,7 @@ const menuItems = [
     name: "用户管理",
     icon: "users",
     caption: "管理后台用户权限与基础资料",
-    gradient: "linear-gradient(135deg, #7b5e4e 0%, #8b6b5a 100%)",
+    gradient: "linear-gradient(135deg, #4f72bf 0%, #78a7cf 100%)",
     requiresCategories: false,
   },
   {
@@ -112,7 +112,7 @@ const menuItems = [
     name: "账号安全",
     icon: "shield",
     caption: "配置登录保护与两步验证",
-    gradient: "linear-gradient(135deg, #5d7a4a 0%, #bd5836 100%)",
+    gradient: "linear-gradient(135deg, #4f72bf 0%, #78a7cf 100%)",
     requiresCategories: false,
   },
   {
@@ -120,7 +120,7 @@ const menuItems = [
     name: "图片管理",
     icon: "image",
     caption: "上传与维护内容配图",
-    gradient: "linear-gradient(135deg, #6b9073 0%, #b57652 100%)",
+    gradient: "linear-gradient(135deg, #4f72bf 0%, #78a7cf 100%)",
     requiresCategories: true,
   },
   {
@@ -128,7 +128,7 @@ const menuItems = [
     name: "资源文件",
     icon: "folder",
     caption: "浏览 Resource 分类并复制公开 URL",
-    gradient: "linear-gradient(135deg, #6b9073 0%, #7b5e4e 100%)",
+    gradient: "linear-gradient(135deg, #4f72bf 0%, #78a7cf 100%)",
     requiresCategories: false,
   },
   {
@@ -136,7 +136,7 @@ const menuItems = [
     name: "缓存文件",
     icon: "cache",
     caption: "浏览、上传、下载和清理缓存文件",
-    gradient: "linear-gradient(135deg, #b57652 0%, #7b5e4e 100%)",
+    gradient: "linear-gradient(135deg, #4f72bf 0%, #78a7cf 100%)",
     requiresCategories: false,
   },
   {
@@ -144,7 +144,7 @@ const menuItems = [
     name: "WWW 部署",
     icon: "deploy",
     caption: "查看 CI WWW 部署记录和重试任务",
-    gradient: "linear-gradient(135deg, #5d7a4a 0%, #7b5e4e 100%)",
+    gradient: "linear-gradient(135deg, #4f72bf 0%, #78a7cf 100%)",
     requiresCategories: false,
   },
 ];
@@ -298,7 +298,7 @@ watch(
   flex: 1;
   display: flex;
   gap: 28px;
-  padding: 92px 28px 40px;
+  padding: var(--app-page-top) 28px 40px;
   min-height: calc(100vh - 112px);
   width: 100%;
   max-width: 1280px;
@@ -347,11 +347,11 @@ watch(
 .sidebar-link {
   text-align: left;
   position: relative;
-  padding: 14px 4px 14px 18px;
+  padding: 12px 18px;
   border: none;
-  border-radius: 0;
+  border-radius: var(--app-radius-md);
   background: transparent;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--app-text-muted);
   cursor: pointer;
   transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
@@ -364,12 +364,13 @@ watch(
 }
 
 .sidebar-link.active {
-  background: var(--app-surface);
-  border-radius: 12px;
+  background: var(--accent-weak);
+  box-shadow: inset 3px 0 0 var(--accent);
+  border-radius: var(--app-radius-md);
 }
 
 .sidebar-link.active::before {
-  content: "";
+  content: none;
   position: absolute;
   left: 0;
   top: 50%;
@@ -382,7 +383,7 @@ watch(
 
 .sidebar-link.active > span {
   color: var(--app-blue);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .admin-content {
@@ -463,7 +464,7 @@ watch(
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 840px) {
   .admin-main {
     padding: 88px 16px 32px;
     overflow-y: auto;
@@ -509,5 +510,31 @@ watch(
   .admin-main.mobile-menu-open {
     opacity: 0.72;
   }
+}
+
+
+/* v4.1 · Admin mobile touch contract */
+@media (max-width: 768px) {
+  .admin-main {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 100svh;
+    padding: 76px 14px 34px !important;
+    gap: 14px !important;
+    overflow-x: clip !important;
+  }
+  .admin-sidebar { display: none !important; }
+  .admin-content,
+  .admin-content-body { width: 100% !important; min-width: 0 !important; }
+  .admin-content-header {
+    margin-bottom: 16px !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  .admin-content-header h1 { font-size: 23px !important; line-height: 1.2 !important; }
+  .admin-sidebar-card--mobile { width: 100% !important; }
+}
+@media (max-width: 420px) {
+  .admin-main { padding-inline: 12px !important; }
 }
 </style>
