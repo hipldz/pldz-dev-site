@@ -7,7 +7,16 @@
 
   <div class="whiteboard-page">
     <main class="main-container whiteboard-main">
-      <section v-depth="1.15" v-spotlight v-reveal class="board-entry" aria-label="打开或新建白板">
+      <section v-reveal class="workspace-masthead" aria-labelledby="whiteboard-title">
+        <div class="workspace-masthead__copy" data-reveal-item>
+          <p class="workspace-kicker"><span aria-hidden="true"></span> Scratchpad / temporary</p>
+          <h1 id="whiteboard-title" class="page-description">白板</h1>
+          <p>用一个密钥暂存文字与图片，随时回来继续。</p>
+        </div>
+        <p class="layout-handnote workspace-signature" data-reveal-item>Scratch, save, return.</p>
+      </section>
+
+      <section v-reveal class="board-entry" aria-label="打开或新建白板">
         <div class="board-entry__label">
           <span class="material-symbols-rounded" aria-hidden="true">link</span>
           <span>
@@ -20,11 +29,11 @@
           <div class="input-wrapper">
             <span class="material-symbols-rounded input-icon" aria-hidden="true">key</span>
             <input ref="keyInputRef" v-model="key" type="text" placeholder="输入密钥，打开已有白板" autocomplete="off" @keyup.enter="handleClick" />
-            <button v-if="key" v-burst="'soft'" class="clear-btn" type="button" @click="clearKey" aria-label="清除密钥">
+            <button v-if="key" class="clear-btn" type="button" @click="clearKey" aria-label="清除密钥">
               <span class="material-symbols-rounded" aria-hidden="true">close</span>
             </button>
           </div>
-          <button v-magnetic="9" v-burst class="entry-action" type="button" @click="handleClick">
+          <button class="entry-action" type="button" @click="handleClick">
             <span>{{ key.trim() ? "打开" : "新建" }}</span>
             <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
           </button>
@@ -34,23 +43,15 @@
       <section v-if="boards.length" class="board-selector" aria-label="已关联白板">
         <span class="selector-label">最近打开</span>
         <div class="key-list">
-          <button
-            v-for="item in boards"
-            v-burst="'soft'"
-            :key="item.key"
-            class="key-chip"
-            :class="{ active: item.key === key }"
-            type="button"
-            @click="selectBoard(item.key)"
-          >
+          <button v-for="item in boards" :key="item.key" class="key-chip" :class="{ active: item.key === key }" type="button" @click="selectBoard(item.key)">
             <span class="material-symbols-rounded" aria-hidden="true">description</span>
             <span>{{ item.key }}</span>
           </button>
         </div>
       </section>
 
-      <section v-spotlight class="board" aria-label="白板内容">
-        <article v-depth="1.05" class="board-card" :class="{ 'board-card--empty': !selectedBoard }">
+      <section class="board" aria-label="白板内容">
+        <article class="board-card" :class="{ 'board-card--empty': !selectedBoard }">
           <header class="card-header">
             <div class="card-meta">
               <p class="card-eyebrow">Current scratchpad</p>
@@ -61,19 +62,19 @@
             </div>
 
             <div class="card-actions" aria-label="白板操作">
-              <button v-burst="'soft'" class="tool-button" type="button" @click="openImageUpload" :disabled="!selectedBoard">
+              <button class="tool-button" type="button" @click="openImageUpload" :disabled="!selectedBoard">
                 <span class="material-symbols-rounded" aria-hidden="true">add_photo_alternate</span><span>图片</span>
               </button>
-              <button v-if="!isEditing" v-burst="'soft'" class="tool-button" type="button" @click="startEditing" :disabled="!canEdit">
+              <button v-if="!isEditing" class="tool-button" type="button" @click="startEditing" :disabled="!canEdit">
                 <span class="material-symbols-rounded" aria-hidden="true">edit_note</span><span>编辑</span>
               </button>
-              <button v-else v-burst="'soft'" class="tool-button" type="button" @click="cancelEditing">
+              <button v-else class="tool-button" type="button" @click="cancelEditing">
                 <span class="material-symbols-rounded" aria-hidden="true">close</span><span>取消</span>
               </button>
-              <button v-burst class="tool-button tool-button--primary" type="button" @click="updateRecord" :disabled="!canSave">
+              <button class="tool-button tool-button--primary" type="button" @click="updateRecord" :disabled="!canSave">
                 <span class="material-symbols-rounded" aria-hidden="true">save</span><span>保存</span>
               </button>
-              <button v-burst="'soft'" class="tool-button" type="button" @click="openFullscreen" :disabled="!selectedBoard || !content">
+              <button class="tool-button" type="button" @click="openFullscreen" :disabled="!selectedBoard || !content">
                 <span class="material-symbols-rounded" aria-hidden="true">open_in_full</span><span>预览</span>
               </button>
             </div>
@@ -106,7 +107,7 @@
                     <span class="material-symbols-rounded" aria-hidden="true">close</span>
                   </button>
                 </div>
-                <button v-burst="'soft'" class="attachment-add" type="button" @click="imageUploadRef?.click()">
+                <button class="attachment-add" type="button" @click="imageUploadRef?.click()">
                   <span class="material-symbols-rounded" aria-hidden="true">add_photo_alternate</span>
                   <span>添加图片</span>
                 </button>
@@ -161,7 +162,7 @@
             <span class="fullscreen-eyebrow">Preview</span>
             <strong id="fullscreen-title" class="fullscreen-title">{{ selectedBoard?.key || "白板内容" }}</strong>
           </div>
-          <button v-burst="'soft'" class="close-btn" type="button" @click="closeFullscreen" aria-label="关闭预览">
+          <button class="close-btn" type="button" @click="closeFullscreen" aria-label="关闭预览">
             <span class="material-symbols-rounded" aria-hidden="true">close</span>
           </button>
         </div>
@@ -534,7 +535,7 @@ onBeforeUnmount(() => {
 
 .whiteboard-page {
   min-height: 100vh;
-  background: var(--app-bg);
+  background: radial-gradient(circle at 84% 9%, color-mix(in srgb, var(--accent) 4.5%, transparent), transparent 27rem), var(--app-bg);
 }
 
 .main-container {
@@ -1902,6 +1903,116 @@ onBeforeUnmount(() => {
   }
   .attachment-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* ============================================================
+   v5.0 · Shared workspace masthead language
+   ============================================================ */
+.main-container {
+  width: min(1180px, calc(100% - 2 * var(--app-page-gutter)));
+  padding-top: 104px;
+}
+.whiteboard-main {
+  gap: 18px;
+}
+.workspace-masthead {
+  position: relative;
+  min-height: 128px;
+  padding: 13px 4px 23px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(38px, 7vw, 100px);
+  border-bottom: 1px solid color-mix(in srgb, var(--app-border-strong) 68%, transparent);
+}
+.workspace-masthead__copy {
+  min-width: 0;
+}
+.workspace-kicker {
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--app-text-soft);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 720;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.workspace-kicker span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.workspace-masthead h1 {
+  margin: 0;
+  color: var(--app-text);
+  font-family: var(--font-display);
+  font-size: clamp(40px, 4.2vw, 52px);
+  font-weight: 610;
+  letter-spacing: -0.042em;
+  line-height: 1;
+}
+.workspace-masthead__copy > p:last-child {
+  margin: 9px 0 0;
+  color: var(--app-text-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.workspace-signature {
+  justify-self: end;
+  margin-right: 8px;
+}
+
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
+  .main-container {
+    padding-top: 76px !important;
+  }
+  .whiteboard-main {
+    gap: 15px !important;
+  }
+  .workspace-masthead {
+    min-height: 0;
+    display: block;
+    padding: 12px 0 16px;
+  }
+  .workspace-kicker {
+    display: none;
+  }
+  .workspace-masthead h1 {
+    font-size: clamp(33px, 10vw, 42px);
+  }
+  .workspace-masthead__copy > p:last-child {
+    margin-top: 7px;
+    font-size: 12.5px;
+  }
+}
+
+/* v5.1 · Workspace controls use restrained, local state changes. */
+.clear-btn,
+.entry-action,
+.key-chip,
+.tool-button,
+.attachment-add,
+.empty-primary,
+.empty-secondary,
+.close-btn {
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 180ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .entry-action:hover,
+  .tool-button--primary:hover:not(:disabled),
+  .empty-primary:hover {
+    box-shadow: 0 7px 18px color-mix(in srgb, var(--accent) 12%, transparent);
   }
 }
 </style>

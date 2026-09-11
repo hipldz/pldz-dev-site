@@ -53,7 +53,6 @@
 
       <div v-else class="empty-state">
         <p>暂无 WWW 部署记录。</p>
-        <button class="btn btn-outline" type="button" @click="loadDeployments">刷新</button>
       </div>
     </div>
   </div>
@@ -223,5 +222,9 @@ onMounted(loadDeployments);
   color: var(--app-blue);
   border-color: var(--accent-line);
   background: var(--accent-weak);
+}
+
+.empty-state {
+  padding: 8px;
 }
 </style>

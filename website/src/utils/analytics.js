@@ -116,7 +116,7 @@ function observeCtaImpressions() {
         });
       });
     },
-    { threshold: 0.55 }
+    { threshold: 0.55 },
   );
 
   document.querySelectorAll(CTA_SELECTOR).forEach((element) => observer.observe(element));

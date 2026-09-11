@@ -268,7 +268,7 @@ watch(
       return;
     }
     syncActiveFromRoute(newId);
-  }
+  },
 );
 
 watch(
@@ -280,7 +280,7 @@ watch(
     if (newId) {
       syncActiveFromRoute(newId);
     }
-  }
+  },
 );
 </script>
 
@@ -305,7 +305,9 @@ watch(
   margin: 0 auto;
   min-width: 0;
   overflow: visible;
-  transition: filter 0.3s ease, transform 0.3s ease;
+  transition:
+    filter 0.3s ease,
+    transform 0.3s ease;
 }
 
 .admin-auth-loading {
@@ -354,7 +356,10 @@ watch(
   font-size: 14px;
   color: var(--app-text-muted);
   cursor: pointer;
-  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .sidebar-link:hover {
@@ -512,7 +517,6 @@ watch(
   }
 }
 
-
 /* v4.1 · Admin mobile touch contract */
 @media (max-width: 768px) {
   .admin-main {
@@ -523,18 +527,30 @@ watch(
     gap: 14px !important;
     overflow-x: clip !important;
   }
-  .admin-sidebar { display: none !important; }
+  .admin-sidebar {
+    display: none !important;
+  }
   .admin-content,
-  .admin-content-body { width: 100% !important; min-width: 0 !important; }
+  .admin-content-body {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
   .admin-content-header {
     margin-bottom: 16px !important;
     align-items: flex-start !important;
     gap: 8px !important;
   }
-  .admin-content-header h1 { font-size: 23px !important; line-height: 1.2 !important; }
-  .admin-sidebar-card--mobile { width: 100% !important; }
+  .admin-content-header h1 {
+    font-size: 23px !important;
+    line-height: 1.2 !important;
+  }
+  .admin-sidebar-card--mobile {
+    width: 100% !important;
+  }
 }
 @media (max-width: 420px) {
-  .admin-main { padding-inline: 12px !important; }
+  .admin-main {
+    padding-inline: 12px !important;
+  }
 }
 </style>

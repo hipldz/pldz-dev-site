@@ -110,7 +110,14 @@
             <span>点击</span>
             <span>UV</span>
           </div>
-          <a v-for="item in articleRows" :key="item.article_id" class="article-row" :href="`/article/${item.article_id}`" target="_blank" rel="noopener noreferrer">
+          <a
+            v-for="item in articleRows"
+            :key="item.article_id"
+            class="article-row"
+            :href="`/article/${item.article_id}`"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <span class="rank">{{ item.rank }}</span>
             <span class="article-title" :title="item.title">{{ item.title }}</span>
             <span>{{ formatNumber(item.clicks) }}</span>
@@ -189,7 +196,7 @@ const articleRows = computed(() =>
     rank: index + 1,
     clicks: Number(item.clicks || 0),
     uv: Number(item.uv || 0),
-  }))
+  })),
 );
 const ctaRows = computed(() => {
   const totalClicks = Number(cta.value.clicks || 0);

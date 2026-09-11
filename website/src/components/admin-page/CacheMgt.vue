@@ -32,9 +32,7 @@
           </option>
         </select>
         <input v-model.trim="keyword" type="search" placeholder="搜索路径或文件名" />
-        <button class="btn btn-outline" type="button" @click="onSelectCacheManagement" :disabled="isCacheLoading">
-          刷新
-        </button>
+        <button class="btn btn-outline" type="button" @click="onSelectCacheManagement" :disabled="isCacheLoading">刷新</button>
       </div>
 
       <div v-if="isCacheLoading" class="loading-stack">
@@ -96,14 +94,10 @@ const { isLoading: isCacheLoading, start: startCacheLoading, stop: stopCacheLoad
 const activeTransfers = computed(() =>
   Object.entries(transferProgress)
     .filter(([, item]) => item.state !== "hidden")
-    .map(([name, item]) => ({ name, ...item }))
+    .map(([name, item]) => ({ name, ...item })),
 );
 
-const categories = computed(() =>
-  [...new Set(cacheMgt.value.map((file) => file.category).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b)
-  )
-);
+const categories = computed(() => [...new Set(cacheMgt.value.map((file) => file.category).filter(Boolean))].sort((a, b) => a.localeCompare(b)));
 
 const filteredCache = computed(() => {
   const query = keyword.value.toLocaleLowerCase();
@@ -127,7 +121,7 @@ watch(
   (category) => {
     const nextCategory = typeof category === "string" ? category : "";
     if (nextCategory !== selectedCategory.value) selectedCategory.value = nextCategory;
-  }
+  },
 );
 
 async function onDeleteCacheFile(file) {

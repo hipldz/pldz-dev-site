@@ -236,7 +236,10 @@ onMounted(async () => {
   border: 1px solid var(--app-border);
   border-radius: 8px;
   background: var(--app-surface);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .user-card:hover {

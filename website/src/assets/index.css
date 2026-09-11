@@ -146,8 +146,7 @@ body {
   color: var(--app-text);
   background:
     radial-gradient(circle at 14% -8%, color-mix(in srgb, var(--accent) 3.5%, transparent), transparent 30rem),
-    radial-gradient(circle at 92% 2%, color-mix(in srgb, var(--brand-support) 2.5%, transparent), transparent 26rem),
-    var(--app-bg);
+    radial-gradient(circle at 92% 2%, color-mix(in srgb, var(--brand-support) 2.5%, transparent), transparent 26rem), var(--app-bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -234,9 +233,13 @@ button,
 .page-button,
 .page-number,
 .text-link {
-  transition: background-color var(--app-motion-duration) var(--app-ease), border-color var(--app-motion-duration) var(--app-ease),
-    color var(--app-motion-duration) var(--app-ease), box-shadow var(--app-motion-duration) var(--app-ease),
-    transform var(--app-motion-duration) var(--app-ease), opacity var(--app-motion-duration) var(--app-ease);
+  transition:
+    background-color var(--app-motion-duration) var(--app-ease),
+    border-color var(--app-motion-duration) var(--app-ease),
+    color var(--app-motion-duration) var(--app-ease),
+    box-shadow var(--app-motion-duration) var(--app-ease),
+    transform var(--app-motion-duration) var(--app-ease),
+    opacity var(--app-motion-duration) var(--app-ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -507,6 +510,36 @@ button,
   --app-page-top: 128px;
   --app-section-gap: clamp(56px, 7vw, 96px);
 }
+
+/* Shared personal note used by page mastheads and reading headers. */
+.layout-handnote {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0;
+  color: color-mix(in srgb, var(--accent) 68%, var(--app-text-soft));
+  font-family: Caveat, cursive;
+  font-size: clamp(25px, 2.2vw, 33px);
+  font-weight: 550;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  transform: rotate(-2deg);
+}
+.layout-handnote::after {
+  content: "";
+  width: clamp(34px, 4vw, 56px);
+  height: 1px;
+  background: linear-gradient(90deg, currentColor, transparent);
+  opacity: 0.44;
+  transform: rotate(-2deg);
+}
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
+  .layout-handnote {
+    display: none !important;
+  }
+}
 :where(button, a, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
@@ -520,8 +553,12 @@ button,
   overflow-wrap: anywhere;
 }
 @media (max-width: 768px) {
-  :root { --app-page-top: 96px; }
-  :where(input, select, textarea) { font-size: 16px; }
+  :root {
+    --app-page-top: 96px;
+  }
+  :where(input, select, textarea) {
+    font-size: 16px;
+  }
 }
 
 /* Focus stays visible for links, chips and custom controls, without layout shifts. */
@@ -532,26 +569,21 @@ button,
 :where(time, .article-meta, .timestamp, .stat-card strong) {
   font-variant-numeric: tabular-nums;
 }
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  :is(.button-primary, .button-secondary, .button-ghost):active:not(:disabled) {
-    transform: translateY(1px);
-  }
-}
-
 :is(.article-row, .category-card, .live-demo-card):focus-within {
   border-color: var(--app-border-strong);
 }
-
 
 /* v3.2 optical polish: a softer canvas and less generic shadow language. */
 :root,
 html[data-theme="light"],
 html[data-theme="gemini"] {
-  --app-shadow-editorial: 0 26px 72px rgba(34,46,70,.075), 0 3px 14px rgba(34,46,70,.025);
+  --app-shadow-editorial: 0 26px 72px rgba(34, 46, 70, 0.075), 0 3px 14px rgba(34, 46, 70, 0.025);
   --app-hairline: color-mix(in srgb, var(--app-border-strong) 68%, transparent);
 }
-::selection { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--app-text); }
-
+::selection {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--app-text);
+}
 
 /* ============================================================
    v4.0 · Precision polish — typography, spacing, optical rhythm
@@ -579,10 +611,14 @@ body {
   line-height: 1.12;
 }
 
-:where(p, li) { text-wrap: pretty; }
+:where(p, li) {
+  text-wrap: pretty;
+}
 
 .material-symbols-rounded,
-.ui-icon { vertical-align: -0.12em; }
+.ui-icon {
+  vertical-align: -0.12em;
+}
 
 @media (max-width: 768px) {
   :root {
@@ -590,7 +626,6 @@ body {
     --app-section-gap: 50px;
   }
 }
-
 
 /* ============================================================
    v4.1 · Mobile layout contract — usability before desktop mimicry
@@ -602,7 +637,9 @@ body {
     --app-section-gap: 52px;
   }
 
-  html, body, #app {
+  html,
+  body,
+  #app {
     width: 100%;
     max-width: 100%;
     overflow-x: clip;
@@ -613,9 +650,16 @@ body {
     -webkit-text-size-adjust: 100%;
   }
 
-  img, video, canvas, svg { max-width: 100%; }
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
 
-  :where(button, a, input, select, textarea) { min-width: 0; }
+  :where(button, a, input, select, textarea) {
+    min-width: 0;
+  }
   :where(button, [role="button"], .button-primary, .button-secondary, .button-ghost, .icon-button) {
     min-height: 44px;
   }
@@ -630,7 +674,9 @@ body {
 }
 
 @media (max-width: 420px) {
-  :root { --app-page-gutter: 13px; }
+  :root {
+    --app-page-gutter: 13px;
+  }
 }
 
 /* Never switch public pages back to a desktop row just because a phone is landscape. */
@@ -657,5 +703,7 @@ body {
     word-break: normal;
     hyphens: auto;
   }
-  :where(a, button) { touch-action: manipulation; }
+  :where(a, button) {
+    touch-action: manipulation;
+  }
 }

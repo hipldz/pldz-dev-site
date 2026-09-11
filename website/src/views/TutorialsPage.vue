@@ -8,42 +8,35 @@
 
   <div class="tutorials-page">
     <main class="tutorials-main">
-      <section v-field v-spotlight v-reveal :class="['tutorials-hero', { 'tutorials-hero--series': isSeriesView }]">
+      <section v-reveal :class="['tutorials-hero', { 'tutorials-hero--series': isSeriesView }]">
         <div class="hero-copy" data-reveal-item>
-          <p class="page-kicker">Library</p>
+          <p class="page-kicker"><span>Library</span><i aria-hidden="true">/</i><span>Articles</span></p>
           <h1 class="page-description">{{ pageTitle }}</h1>
-          <p class="page-subtitle">持续的记录我做过的事情, 遇到的问题, 或者是一些感兴趣的工具, 信息等等.</p>
+          <p class="page-subtitle">持续记录我做过的事情、遇到的问题，以及感兴趣的工具与信息。</p>
         </div>
 
         <div class="hero-stat" data-reveal-item data-motion-layer="0.65" :aria-label="`${sortedArticles.length} ${isSeriesView ? '篇文章' : '个专栏'}`">
-          <span>{{ isSeriesView ? "Series" : "Collections" }}</span>
           <strong>{{ formatCount(sortedArticles.length) }}</strong>
           <small>{{ isSeriesView ? "篇文章" : "个专栏" }}</small>
         </div>
+      </section>
 
+      <section class="archive-controls" aria-label="列表排序">
         <div class="toolbar" data-reveal-item>
-          <a v-if="isSeriesView" v-burst="'soft'" class="back-link" href="/articles"
+          <span class="toolbar-label">Sort by</span>
+          <a v-if="isSeriesView" class="back-link" href="/articles"
             ><span class="material-symbols-rounded" aria-hidden="true">arrow_back</span><span>返回</span></a
           >
           <button
             v-for="option in sortOptions"
-            v-burst="'soft'"
             :key="option.value"
             :class="['sort-chip', { active: sortBy === option.value }]"
             type="button"
             @click="sortBy = option.value"
           >
-            <span class="material-symbols-rounded" aria-hidden="true">{{
-              option.value === "date" ? "schedule" : option.value === "views" ? "visibility" : "format_list_numbered"
-            }}</span>
             <span>{{ option.label }}</span>
           </button>
         </div>
-      </section>
-
-      <section class="tutorials-summary">
-        <span>共 {{ sortedArticles.length }} {{ isSeriesView ? "篇" : "个专栏" }}</span>
-        <span>第 {{ currentPage }} / {{ totalPages }} 页</span>
       </section>
 
       <section v-if="isSeriesView" class="article-list timeline-list" aria-label="系列时间线">
@@ -55,7 +48,7 @@
 
           <div class="timeline-node" aria-hidden="true"></div>
 
-          <a v-burst="'soft'" v-cursor="'READ'" data-reveal-media class="timeline-cover" :href="getArticleLink(article)" :aria-label="article.title">
+          <a v-cursor="'READ'" data-reveal-media class="timeline-cover" :href="getArticleLink(article)" :aria-label="article.title">
             <img data-depth-layer="0.75" :src="article.thumbnail || defaultCover" :alt="article.title" loading="lazy" decoding="async" />
           </a>
 
@@ -67,7 +60,7 @@
             </div>
 
             <h2>
-              <a v-burst="'soft'" :href="getArticleLink(article)">{{ article.title }}</a>
+              <a :href="getArticleLink(article)">{{ article.title }}</a>
             </h2>
             <p>{{ article.summary || "还没写摘要" }}</p>
 
@@ -75,7 +68,7 @@
               <div class="tag-list">
                 <span v-for="tag in (article.tags || []).slice(0, 2)" :key="tag" class="tag-chip">{{ tag }}</span>
               </div>
-              <a v-burst="'soft'" class="article-link" :href="getArticleLink(article)"
+              <a class="article-link" :href="getArticleLink(article)"
                 ><span>去读读</span><span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a
               >
             </div>
@@ -83,17 +76,11 @@
         </article>
       </section>
 
-      <section v-else class="portfolio-archive" aria-label="专栏作品索引">
+      <section v-else class="portfolio-archive" aria-label="文章专栏列表">
         <div class="portfolio-archive__list">
-          <div class="portfolio-archive__head">
-            <span>Collections / {{ formatCount(pagedArticles.length) }}</span>
-            <small>Hover to preview · click to open</small>
-          </div>
-
           <a
             v-for="(article, index) in pagedArticles"
             :key="article.id"
-            v-burst="'soft'"
             :class="['portfolio-row', { 'is-active': activeCollectionIndex === index }]"
             :href="getArticleLink(article)"
             @mouseenter="setActiveCollection(index)"
@@ -114,14 +101,12 @@
 
         <aside v-if="activeCollection" class="portfolio-preview" aria-live="polite">
           <div class="portfolio-preview__topline">
-            <span>Selected work</span>
+            <span>专栏预览</span>
             <span>{{ formatCount(activeCollectionIndex + 1) }} / {{ formatCount(pagedArticles.length) }}</span>
           </div>
 
           <a
-            v-depth="0.58"
             v-cursor="'OPEN'"
-            v-burst="'soft'"
             class="portfolio-preview__media"
             :href="getArticleLink(activeCollection)"
             :aria-label="`打开 ${getCategoryTitle(activeCollection)}`"
@@ -141,34 +126,35 @@
 
           <div class="portfolio-preview__caption">
             <div class="portfolio-preview__identity">
-              <span>Collection</span>
-              <span>{{ activeCollection.category || "archive" }}</span>
+              <span>文章专栏</span>
+              <span>{{ activeCollection.category || "未分类" }}</span>
             </div>
             <h2>
-              <a v-burst="'soft'" :href="getArticleLink(activeCollection)">{{ getCategoryTitle(activeCollection) }}</a>
+              <a :href="getArticleLink(activeCollection)">{{ getCategoryTitle(activeCollection) }}</a>
             </h2>
             <p>{{ activeCollection.summary || "还没写摘要" }}</p>
-            <a v-burst class="portfolio-preview__cta" :href="getArticleLink(activeCollection)"
+            <a class="portfolio-preview__cta" :href="getArticleLink(activeCollection)"
               >进入专栏<span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a
             >
           </div>
         </aside>
       </section>
 
-      <nav v-if="totalPages > 1" class="pagination" aria-label="文章分页">
-        <button v-burst="'soft'" class="page-button" type="button" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
-        <button
-          v-for="page in visiblePages"
-          v-burst="'soft'"
-          :key="page"
-          :class="['page-number', { active: page === currentPage }]"
-          type="button"
-          @click="goToPage(page)"
-        >
-          {{ page }}
-        </button>
-        <button v-burst="'soft'" class="page-button" type="button" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">下一页</button>
-      </nav>
+      <footer class="tutorials-footer" aria-label="列表汇总">
+        <div class="tutorials-summary">
+          <span v-if="totalPages > 1">本页 {{ pagedArticles.length }} {{ isSeriesView ? "篇文章" : "个专栏" }} · 共 {{ sortedArticles.length }}</span>
+          <span v-else>已展示全部 {{ sortedArticles.length }} {{ isSeriesView ? "篇文章" : "个专栏" }}</span>
+          <span v-if="totalPages > 1">第 {{ currentPage }} / {{ totalPages }} 页</span>
+        </div>
+
+        <nav v-if="totalPages > 1" class="pagination" aria-label="文章分页">
+          <button class="page-button" type="button" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
+          <button v-for="page in visiblePages" :key="page" :class="['page-number', { active: page === currentPage }]" type="button" @click="goToPage(page)">
+            {{ page }}
+          </button>
+          <button class="page-button" type="button" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">下一页</button>
+        </nav>
+      </footer>
     </main>
 
     <FooterBar />
@@ -518,8 +504,9 @@ watch(activeCategory, loadArticles);
   position: absolute;
   top: 26px;
   bottom: 28px;
-  left: 126px;
+  left: 122px;
   width: 1px;
+  transform: translateX(-50%);
   background: var(--app-border);
 }
 
@@ -2306,7 +2293,6 @@ watch(activeCategory, loadArticles);
 }
 .portfolio-archive__list {
   min-width: 0;
-  border-top: 1px solid var(--app-border-strong);
 }
 .portfolio-archive__head,
 .portfolio-preview__topline {
@@ -2681,7 +2667,7 @@ watch(activeCategory, loadArticles);
   white-space: normal;
   text-overflow: clip;
   font-size: clamp(19px, 1.8vw, 25px);
-  line-height: 1.16;
+  line-height: 1.2;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -2844,7 +2830,7 @@ watch(activeCategory, loadArticles);
   }
 
   .timeline-list::before {
-    left: 7px !important;
+    left: 10px !important;
   }
   .timeline-item {
     grid-template-columns: 20px minmax(0, 1fr) !important;
@@ -2938,6 +2924,264 @@ watch(activeCategory, loadArticles);
     align-items: flex-start !important;
     flex-direction: column !important;
     gap: 4px !important;
+  }
+}
+
+/* ============================================================
+   v5.0 · Editorial archive masthead
+   ============================================================ */
+.tutorials-main {
+  width: min(1180px, calc(100% - 2 * var(--app-page-gutter)));
+  max-width: 1180px;
+  padding-top: 104px;
+}
+
+.tutorials-hero {
+  min-height: 184px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(42px, 8vw, 120px);
+  padding: 24px 4px 28px;
+  border-bottom: 1px solid color-mix(in srgb, var(--app-border-strong) 66%, transparent);
+}
+.tutorials-hero::before,
+.tutorials-hero::after {
+  display: none;
+}
+.hero-copy {
+  max-width: 760px;
+  gap: 7px;
+}
+.page-kicker {
+  margin: 0 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 740;
+  letter-spacing: 0.13em;
+  line-height: 1.4;
+}
+.page-kicker i {
+  color: var(--app-border-strong);
+  font-style: normal;
+}
+.page-description {
+  font-family: var(--font-display);
+  font-size: clamp(42px, 4.2vw, 52px);
+  font-weight: 610;
+  line-height: 1;
+  letter-spacing: -0.042em;
+}
+.page-subtitle {
+  max-width: 690px;
+  margin-top: 4px;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.hero-stat {
+  min-width: 160px;
+  padding: 11px 4px 11px 28px;
+  display: flex;
+  grid-template-columns: none;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 10px;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--app-border-strong) 68%, transparent);
+}
+.hero-stat::after {
+  display: none;
+}
+.hero-stat strong {
+  font-size: 42px;
+  font-weight: 620;
+  line-height: 1;
+}
+.hero-stat small {
+  color: var(--app-text-soft);
+  font-size: 11px;
+}
+
+.archive-controls {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--app-border);
+}
+.toolbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 34px;
+  padding: 0 4px;
+}
+.toolbar-label {
+  color: var(--app-text-soft);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 720;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.back-link,
+.sort-chip {
+  position: relative;
+  min-height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--app-text-muted);
+  font-size: 12px;
+  font-weight: 580;
+  box-shadow: none;
+}
+.back-link:hover,
+.sort-chip:hover,
+.sort-chip.active {
+  border: 0;
+  background: transparent;
+  color: var(--app-text);
+  box-shadow: none;
+}
+.sort-chip::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 180ms var(--app-ease);
+}
+.sort-chip.active::after {
+  transform: scaleX(1);
+}
+.tutorials-summary {
+  padding: 25px 4px 18px;
+}
+
+@media (max-width: 980px) {
+  .tutorials-main {
+    padding-top: 90px;
+  }
+  .tutorials-hero {
+    min-height: 168px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-top: 20px;
+  }
+  .hero-copy {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
+  .tutorials-main {
+    padding-top: 76px !important;
+  }
+  .tutorials-hero {
+    min-height: 0 !important;
+    gap: 0 !important;
+    padding: 22px 0 25px !important;
+  }
+  .page-kicker {
+    font-size: 8.5px !important;
+  }
+  .page-description {
+    font-size: clamp(34px, 10.5vw, 46px) !important;
+  }
+  .page-subtitle {
+    font-size: 12.5px !important;
+  }
+  .archive-controls {
+    width: calc(100% + 32px);
+    min-height: 62px;
+    margin-inline: -16px;
+    overflow: hidden;
+  }
+  .toolbar {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 16px !important;
+    gap: 26px !important;
+  }
+  .sort-chip,
+  .back-link {
+    min-height: 40px !important;
+    padding: 0 !important;
+  }
+}
+
+/* v5.1 · Archive hover contract: local feedback without dimming the list. */
+@media (hover: hover) and (pointer: fine) {
+  .portfolio-archive__list:has(.portfolio-row:hover) .portfolio-row:not(:hover) {
+    opacity: 1;
+  }
+  .portfolio-row:hover {
+    background: color-mix(in srgb, var(--app-surface) 84%, transparent);
+    transform: none;
+  }
+  .portfolio-row:hover::before {
+    height: 28px;
+  }
+  .portfolio-row:hover .portfolio-row__arrow {
+    transform: translate(1px, -1px);
+  }
+  .portfolio-preview__media:hover .portfolio-preview__open {
+    transform: translate(1px, -1px);
+  }
+  .timeline-cover:hover img {
+    transform: scale(1.008);
+  }
+}
+
+/* v5.2 · Keep counts as a quiet closing note instead of repeating them above the archive. */
+.portfolio-archive {
+  padding-bottom: 0;
+}
+.tutorials-footer {
+  margin-top: clamp(28px, 4vw, 48px);
+  padding: 20px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid var(--app-border);
+}
+.tutorials-footer .tutorials-summary {
+  flex: 1 1 auto;
+  padding: 0;
+}
+.tutorials-footer .pagination {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 0;
+  border-top: 0;
+}
+
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
+  .portfolio-archive {
+    padding-bottom: 0 !important;
+  }
+  .tutorials-footer {
+    margin-top: 30px;
+    padding-inline: 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .tutorials-footer .tutorials-summary {
+    padding: 0 !important;
+  }
+  .tutorials-footer .pagination {
+    justify-content: flex-start !important;
   }
 }
 </style>

@@ -8,14 +8,29 @@
 
   <div class="main-container">
     <main class="live-lab-shell">
-      <section v-field v-spotlight v-reveal class="lab-masthead" aria-labelledby="livedemo-title">
+      <section v-reveal class="lab-masthead" aria-labelledby="livedemo-title">
         <div class="lab-masthead__copy" data-reveal-item>
-          <p class="lab-kicker"><span aria-hidden="true"></span> Interactive playground / {{ formatCount(mockData.length) }}</p>
-          <h1 id="livedemo-title">Live Demo</h1>
-          <p class="lab-masthead__lead">每个Demo可以先预览效果、观察, 再决定查看源码。</p>
+          <p class="lab-kicker"><span aria-hidden="true"></span> Live lab / runs 01—{{ formatCount(mockData.length) }}</p>
+          <h1 id="livedemo-title">
+            <span class="lab-title__live">Live</span><i class="lab-title__slash" aria-hidden="true">/</i><span class="lab-title__demo">Demo</span>
+          </h1>
+          <p class="lab-masthead__lead">选择实验，预览运行效果，再决定打开 Demo 或查看源码。</p>
         </div>
 
-        <p class="lab-masthead__signature" data-reveal-item>Preview, play, build.</p>
+        <div class="lab-masthead__status" data-reveal-item aria-label="实验台状态">
+          <div class="lab-status-cell">
+            <span>{{ formatCount(mockData.length) }} experiments</span>
+            <strong>{{ formatCount(mockData.length) }}</strong>
+          </div>
+          <div class="lab-status-cell lab-status-cell--ready">
+            <span><i aria-hidden="true"></i> Ready</span>
+            <strong>READY</strong>
+          </div>
+          <div class="lab-status-cell lab-status-cell--flow">
+            <span>Select · Preview · Open</span>
+            <p class="layout-handnote lab-status-signature">Preview, play, build.</p>
+          </div>
+        </div>
       </section>
 
       <section v-if="loading" class="lab-state" aria-live="polite">
@@ -26,10 +41,10 @@
       <section v-else-if="loadError" class="lab-state lab-state--error" aria-live="polite">
         <span class="material-symbols-rounded" aria-hidden="true">error</span>
         <p>{{ loadError }}</p>
-        <button v-burst type="button" @click="loadDemos">重新加载</button>
+        <button type="button" @click="loadDemos">重新加载</button>
       </section>
 
-      <section v-else-if="activeDemo" id="demo-list" v-spotlight class="lab-console" aria-label="Live Demo 实验台">
+      <section v-else-if="activeDemo" id="demo-list" class="lab-console" aria-label="Live Demo 实验台">
         <aside class="lab-runs" aria-label="实验项目">
           <div class="lab-runs__head">
             <div>
@@ -43,7 +58,6 @@
             <button
               v-for="(demo, index) in mockData"
               :key="demo.folder || demo.title || demo.url || index"
-              v-burst="'soft'"
               :class="['lab-run', { 'is-active': activeDemoIndex === index }]"
               type="button"
               role="listitem"
@@ -83,7 +97,7 @@
             <div class="lab-stage__counter">RUN {{ formatCount(activeDemoIndex + 1) }} — {{ formatCount(mockData.length) }}</div>
           </div>
 
-          <figure v-depth="0.46" v-cursor="'OPEN'" class="lab-viewport">
+          <figure v-cursor="'OPEN'" class="lab-viewport">
             <div class="lab-viewport__grid" aria-hidden="true"></div>
             <div class="lab-viewport__halo" aria-hidden="true"></div>
 
@@ -105,21 +119,15 @@
             </div>
 
             <div class="lab-action-dock" aria-label="Demo 操作">
-              <button
-                v-if="activeDemo.previewgif"
-                v-burst="'soft'"
-                :class="['lab-action', { 'is-active': isLivePreview }]"
-                type="button"
-                @click="toggleLivePreview"
-              >
+              <button v-if="activeDemo.previewgif" :class="['lab-action', { 'is-active': isLivePreview }]" type="button" @click="toggleLivePreview">
                 <span class="material-symbols-rounded" aria-hidden="true">{{ isLivePreview ? "pause" : "play_arrow" }}</span>
                 <span>{{ isLivePreview ? "回到封面" : "播放预览" }}</span>
               </button>
-              <button v-burst class="lab-action lab-action--primary" type="button" :disabled="!activeDemo.url" @click="onGoPreview(activeDemo.url)">
+              <button class="lab-action lab-action--primary" type="button" :disabled="!activeDemo.url" @click="onGoPreview(activeDemo.url)">
                 <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span>
                 <span>打开 Demo</span>
               </button>
-              <a v-if="activeDemo.sourcelink" v-burst="'soft'" class="lab-action" :href="activeDemo.sourcelink" target="_blank" rel="noopener noreferrer">
+              <a v-if="activeDemo.sourcelink" class="lab-action" :href="activeDemo.sourcelink" target="_blank" rel="noopener noreferrer">
                 <span class="material-symbols-rounded" aria-hidden="true">code</span>
                 <span>源码</span>
               </a>
@@ -1796,6 +1804,356 @@ onBeforeUnmount(() => {
   }
   .lab-masthead__signature::after {
     width: 36px;
+  }
+}
+
+/* ============================================================
+   v5.0 · Live Lab launch strip
+   ============================================================ */
+.main-container {
+  width: min(1180px, calc(100% - 2 * var(--app-page-gutter)));
+  padding-top: 104px;
+}
+.live-lab-shell {
+  gap: 36px;
+}
+.lab-masthead {
+  min-height: 178px;
+  grid-template-columns: minmax(0, 1fr) minmax(430px, 0.86fr);
+  align-items: center;
+  gap: clamp(44px, 6vw, 88px);
+  padding: 17px 0 28px;
+  border-bottom: 1px solid color-mix(in srgb, var(--app-border-strong) 68%, transparent);
+}
+.lab-masthead::after {
+  display: none;
+}
+.lab-kicker {
+  margin-bottom: 12px;
+  gap: 10px;
+  color: var(--app-text-soft);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+.lab-kicker > span {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  background: var(--app-green);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--app-green) 8%, transparent);
+}
+.lab-kicker > span::before {
+  display: none;
+}
+.lab-masthead h1 {
+  font-size: clamp(46px, 5.2vw, 62px);
+  font-weight: 610;
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+}
+.lab-masthead__lead {
+  max-width: 610px;
+  margin-top: 13px;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.lab-masthead__signature {
+  display: none;
+}
+.lab-masthead__status {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 0.85fr 0.8fr 1.35fr;
+  align-items: stretch;
+  border-left: 1px solid color-mix(in srgb, var(--app-border-strong) 68%, transparent);
+}
+.lab-status-cell {
+  min-width: 0;
+  min-height: 84px;
+  padding: 11px clamp(18px, 2vw, 28px);
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  border-right: 1px solid var(--app-border);
+}
+.lab-status-cell:last-child {
+  border-right: 0;
+}
+.lab-status-cell span {
+  overflow: hidden;
+  color: var(--app-text-soft);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.lab-status-cell strong {
+  color: var(--app-text);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 620;
+  line-height: 1;
+}
+.lab-status-cell--ready span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lab-status-cell--ready i {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--app-green);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--app-green) 8%, transparent);
+}
+.lab-status-signature {
+  gap: 9px;
+  font-size: clamp(24px, 2vw, 30px);
+}
+.lab-status-signature::after {
+  width: clamp(26px, 3vw, 42px);
+}
+
+@media (max-width: 1050px) {
+  .lab-masthead {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding-bottom: 26px;
+  }
+  .lab-masthead__status {
+    width: min(100%, 650px);
+  }
+}
+
+@media (max-width: 820px) {
+  .main-container {
+    padding-top: 84px;
+  }
+}
+
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
+  .main-container {
+    padding-top: 76px !important;
+  }
+  .live-lab-shell {
+    gap: 24px !important;
+  }
+  .lab-masthead {
+    min-height: 0 !important;
+    display: block !important;
+    padding: 14px 0 18px !important;
+    border-bottom: 1px solid var(--app-border) !important;
+  }
+  .lab-kicker,
+  .lab-masthead__status {
+    display: none !important;
+  }
+  .lab-masthead h1 {
+    font-size: clamp(36px, 11vw, 48px) !important;
+  }
+  .lab-masthead__lead {
+    margin-top: 9px !important;
+    font-size: 12.5px !important;
+  }
+}
+
+/* ============================================================
+   v5.1 · Quieter color, local hover, more expressive type
+   ============================================================ */
+:global(body.route-live-lab) {
+  background: var(--app-bg);
+}
+.live-lab-shell {
+  --lab-line: color-mix(in srgb, var(--app-border-strong) 58%, transparent);
+  --lab-line-soft: color-mix(in srgb, var(--app-border) 74%, transparent);
+  --lab-workspace: var(--app-surface);
+  --lab-rail: color-mix(in srgb, var(--app-surface-sunken) 58%, var(--app-surface));
+  --lab-stage: var(--app-surface);
+  --lab-grid: color-mix(in srgb, var(--accent) 4.5%, transparent);
+  gap: 30px;
+}
+.lab-masthead {
+  min-height: 154px;
+  grid-template-columns: minmax(360px, 0.88fr) minmax(500px, 1fr);
+  gap: clamp(38px, 5vw, 70px);
+  padding: 12px 0 23px;
+}
+.lab-kicker {
+  margin-bottom: 10px;
+}
+.lab-kicker > span {
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.lab-masthead h1 {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(8px, 1vw, 13px);
+  font-size: clamp(42px, 4.2vw, 52px);
+  font-weight: 610;
+  line-height: 1;
+  letter-spacing: -0.042em;
+}
+.lab-title__slash {
+  color: color-mix(in srgb, var(--accent) 54%, var(--app-text-soft));
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 520;
+  letter-spacing: 0;
+  transform: translateY(-0.45em);
+}
+.lab-title__demo {
+  color: color-mix(in srgb, var(--app-text) 78%, var(--app-text-muted));
+  font-weight: 430;
+}
+.lab-masthead__lead {
+  margin-top: 11px;
+  font-size: 12.75px;
+}
+.lab-masthead__status {
+  border-left-color: color-mix(in srgb, var(--app-border-strong) 52%, transparent);
+}
+.lab-status-cell {
+  min-height: 72px;
+  padding: 9px clamp(17px, 1.8vw, 24px);
+  gap: 8px;
+  border-right-color: color-mix(in srgb, var(--app-border) 72%, transparent);
+}
+.lab-status-cell strong {
+  font-size: 22px;
+  font-weight: 570;
+}
+.lab-status-cell--ready strong {
+  color: color-mix(in srgb, var(--app-green) 70%, var(--app-text));
+}
+.lab-status-cell--ready i {
+  width: 6px;
+  height: 6px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-green) 7%, transparent);
+}
+.lab-status-signature {
+  font-size: clamp(23px, 1.85vw, 28px);
+}
+
+.lab-console {
+  border-radius: 22px;
+  background: var(--app-surface);
+  box-shadow:
+    0 14px 42px rgba(31, 43, 63, 0.045),
+    inset 0 1px 0 color-mix(in srgb, #fff 56%, transparent);
+}
+.lab-console::before {
+  display: none;
+}
+.lab-runs {
+  background: var(--lab-rail);
+}
+.lab-run {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 180ms ease;
+}
+.lab-run.is-active {
+  border-color: color-mix(in srgb, var(--accent) 15%, var(--app-border));
+  background: color-mix(in srgb, var(--app-surface) 96%, var(--accent) 4%);
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--accent) 74%, transparent);
+  transform: none;
+}
+.lab-run.is-active .lab-run__number {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 5%, transparent);
+}
+.lab-stage {
+  background: var(--lab-stage);
+}
+.lab-viewport {
+  border-color: color-mix(in srgb, var(--app-border-strong) 66%, transparent);
+  background: color-mix(in srgb, var(--app-surface-sunken) 72%, var(--app-surface));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 52%, transparent),
+    0 10px 30px rgba(31, 43, 63, 0.045);
+}
+.lab-viewport__grid {
+  opacity: 0.28;
+}
+.lab-viewport__halo {
+  opacity: 0.34;
+}
+.lab-media-frame {
+  box-shadow:
+    0 12px 30px rgba(31, 43, 63, 0.065),
+    inset 0 1px 0 color-mix(in srgb, #fff 58%, transparent);
+}
+.lab-action-dock {
+  border-color: color-mix(in srgb, var(--app-border-strong) 72%, transparent);
+  background: color-mix(in srgb, var(--app-surface) 94%, transparent);
+  box-shadow: 0 8px 22px rgba(31, 43, 63, 0.065);
+  backdrop-filter: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lab-run:hover:not(.is-active) {
+    border-color: transparent;
+    background: color-mix(in srgb, var(--app-surface) 91%, var(--accent) 2.5%);
+    box-shadow: inset 2px 0 0 color-mix(in srgb, var(--accent) 22%, transparent);
+    transform: none;
+  }
+  .lab-run:hover .lab-run__arrow {
+    color: var(--accent);
+    opacity: 0.8;
+    transform: translateX(1px);
+  }
+  .lab-viewport:hover {
+    border-color: color-mix(in srgb, var(--accent) 15%, var(--app-border-strong));
+  }
+  .lab-action:hover,
+  .lab-action.is-active {
+    border-color: transparent;
+    background: var(--accent-weak);
+    color: var(--accent);
+  }
+  .lab-action--primary:hover {
+    background: var(--accent-hover);
+    color: var(--app-on-accent);
+  }
+}
+
+@media (max-width: 1050px) {
+  .lab-masthead {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
+  .live-lab-shell {
+    gap: 20px !important;
+  }
+  .lab-masthead {
+    padding-block: 11px 15px !important;
+  }
+  .lab-masthead h1 {
+    gap: 7px;
+    font-size: clamp(32px, 9.5vw, 40px) !important;
+    letter-spacing: -0.035em;
+  }
+  .lab-title__slash {
+    display: none;
+  }
+  .lab-masthead__lead {
+    font-size: 12px !important;
+  }
+  .lab-console {
+    border-radius: 19px;
+    box-shadow: 0 10px 28px rgba(31, 43, 63, 0.035);
   }
 }
 </style>

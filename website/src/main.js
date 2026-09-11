@@ -7,7 +7,7 @@ import { createApp } from "vue";
 import { refresh } from "./utils/apis";
 import { initAnalytics } from "./utils/analytics";
 import { initTheme } from "./utils/theme";
-import { burst, cursor, depth, field, magnetic, reveal, spotlight } from "./utils/motion";
+import { cursor, depth, field, magnetic, reveal, spotlight } from "./utils/motion";
 
 const refreshAuthState = async () => {
   try {
@@ -39,7 +39,6 @@ const bootstrap = () => {
     app.directive("depth", depth);
     app.directive("field", field);
     app.directive("magnetic", magnetic);
-    app.directive("burst", burst);
     app.directive("cursor", cursor);
     app.use(store);
     app.use(router);

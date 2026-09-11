@@ -35,14 +35,16 @@ hljs.registerLanguage("yaml", yaml);
 hljs.registerLanguage("yml", yaml);
 
 function slugify(value = "") {
-  return String(value)
-    .toLowerCase()
-    .trim()
-    .replace(/<[^>]+>/g, "")
-    .replace(/[^\w\u4e00-\u9fa5\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "") || "section";
+  return (
+    String(value)
+      .toLowerCase()
+      .trim()
+      .replace(/<[^>]+>/g, "")
+      .replace(/[^\w\u4e00-\u9fa5\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "") || "section"
+  );
 }
 
 function createSlugFactory() {
@@ -72,16 +74,13 @@ function walkTokens(tokens, visitor) {
 }
 
 function escapeHtml(value = "") {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 function normalizeLanguage(lang = "") {
-  const language = String(lang || "").trim().toLowerCase();
+  const language = String(lang || "")
+    .trim()
+    .toLowerCase();
   if (!language) return "";
   if (hljs.getLanguage(language)) return language;
   return "";
@@ -161,9 +160,7 @@ export function renderMarkdown(source = "") {
     const language = normalizeLanguage(lang) || "plaintext";
     const languageLabel = language.toUpperCase();
     const encodedCode = encodeURIComponent(text || "");
-    const highlightedHtml = hljs.getLanguage(language)
-      ? hljs.highlight(text || "", { language }).value
-      : escapeHtml(text || "");
+    const highlightedHtml = hljs.getLanguage(language) ? hljs.highlight(text || "", { language }).value : escapeHtml(text || "");
 
     return [
       '<div class="code-block">',

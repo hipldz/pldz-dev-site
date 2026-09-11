@@ -29,7 +29,6 @@
             <a
               v-for="(command, index) in quickCommands"
               :key="command.href"
-              v-burst
               v-cursor="'GO'"
               :class="['command-card', { 'is-selected': selectedIndex === index }]"
               :href="command.href"
@@ -72,7 +71,6 @@
             <a
               v-for="(result, index) in combinedResults"
               :key="`${result.type}-${result.key}`"
-              v-burst
               v-cursor="'OPEN'"
               :class="['command-result', { 'is-selected': selectedIndex === index }]"
               :href="result.href"

@@ -2,10 +2,10 @@
   <header :class="['header', { 'header--hidden': !isHeaderVisible, 'header--scrolled': hasScrolled }]">
     <div class="header-inner">
       <div class="header-left">
-        <button v-if="showMobileMenu" v-burst="'soft'" class="mobile-menu-btn" type="button" aria-label="打开导航菜单" @click="toggleMobileMenu()">
+        <button v-if="showMobileMenu" class="mobile-menu-btn" type="button" aria-label="打开导航菜单" @click="toggleMobileMenu()">
           <span class="material-symbols-rounded" aria-hidden="true">menu</span>
         </button>
-        <a v-magnetic="6" v-burst class="brand-link" href="/">
+        <a class="brand-link" href="/">
           <span class="app-logo"></span>
           <span class="brand-copy">
             <span class="brand-name">Hi 爬楼的猪</span>
@@ -17,10 +17,10 @@
       <nav class="header-nav" aria-label="主导航">
         <ul ref="navAllRef" class="nav-menu">
           <li v-for="item in navItems" :key="item.label" :class="['nav-item', { active: isActive(item) }]">
-            <a v-burst="'soft'" :href="item.href" :aria-current="isActive(item) ? 'page' : undefined">{{ item.label }}</a>
+            <a :href="item.href" :aria-current="isActive(item) ? 'page' : undefined">{{ item.label }}</a>
           </li>
           <li v-for="nav in navs" :key="nav.title" class="nav-item nav-item--external">
-            <a v-burst="'soft'" :href="nav.url" target="_blank" rel="noopener noreferrer">
+            <a :href="nav.url" target="_blank" rel="noopener noreferrer">
               {{ nav.title }}
               <span v-if="nav.new" class="nav-badge">new</span>
             </a>
@@ -30,21 +30,21 @@
 
       <div class="header-right">
         <div class="theme-picker">
-          <button v-burst="'soft'" class="theme-trigger" type="button" aria-label="切换主题" :aria-pressed="currentTheme === 'dark'" @click="onToggleTheme">
+          <button class="theme-trigger" type="button" aria-label="切换主题" :aria-pressed="currentTheme === 'dark'" @click="onToggleTheme">
             <span class="material-symbols-rounded theme-trigger__icon" aria-hidden="true">{{ currentTheme === "dark" ? "dark_mode" : "light_mode" }}</span>
           </button>
         </div>
 
-        <button v-magnetic="6" v-burst class="search-trigger" type="button" aria-label="打开全局搜索与命令面板" title="搜索 / 快速前往" @click="onOpenSearch">
+        <button v-magnetic="6" class="search-trigger" type="button" aria-label="打开全局搜索与命令面板" title="搜索 / 快速前往" @click="onOpenSearch">
           <span class="material-symbols-rounded search-trigger__icon" aria-hidden="true">search</span>
           <span class="search-trigger__text">搜索</span>
           <kbd class="search-trigger__kbd" aria-hidden="true">{{ shortcutLabel }}</kbd>
         </button>
 
-        <div v-if="avatar" v-burst="'soft'" class="user-avatar" @click="onToggleLoginForm">
+        <div v-if="avatar" class="user-avatar" @click="onToggleLoginForm">
           <img :src="avatar" alt="avatar" />
         </div>
-        <button v-else v-burst="'soft'" class="login-register-btn" @click="onToggleLoginForm">
+        <button v-else class="login-register-btn" @click="onToggleLoginForm">
           <span class="material-symbols-rounded" aria-hidden="true">person</span><span>登录 / 注册</span>
         </button>
       </div>
@@ -111,6 +111,7 @@ let accumulatedUp = 0;
 let accumulatedDown = 0;
 let scrollListenerActive = false;
 let isActivePage = true;
+const SCROLLED_THRESHOLD = 80;
 
 function isActive(item) {
   if (item.href === "/") return route.path === "/";
@@ -120,7 +121,7 @@ function isActive(item) {
 
 function handleScroll() {
   const currentY = window.scrollY;
-  hasScrolled.value = currentY > 16;
+  hasScrolled.value = currentY > SCROLLED_THRESHOLD;
   const diff = currentY - lastScrollY;
 
   if (Math.abs(diff) < 1) {
@@ -131,7 +132,7 @@ function handleScroll() {
   if (diff > 0) {
     accumulatedDown += diff;
     accumulatedUp = 0;
-    if (accumulatedDown > 10 && currentY > 80 && isHeaderVisible.value) {
+    if (accumulatedDown > 10 && currentY > SCROLLED_THRESHOLD && isHeaderVisible.value) {
       isHeaderVisible.value = false;
       accumulatedDown = 0;
     }
@@ -164,12 +165,12 @@ function enableScrollHide() {
   // made navigation feel broken and caused visible layout jitter.
   if (isMobileNavigationViewport()) {
     disableScrollHide();
-    hasScrolled.value = window.scrollY > 16;
+    hasScrolled.value = window.scrollY > SCROLLED_THRESHOLD;
     return;
   }
   if (scrollListenerActive) return;
   lastScrollY = window.scrollY;
-  hasScrolled.value = lastScrollY > 16;
+  hasScrolled.value = lastScrollY > SCROLLED_THRESHOLD;
   window.addEventListener("scroll", onScrollThrottled, { passive: true });
   scrollListenerActive = true;
 }
@@ -219,7 +220,7 @@ function onViewportResize() {
   if (!isActivePage || !props.scroll) return;
   if (isMobileNavigationViewport()) disableScrollHide();
   else enableScrollHide();
-  hasScrolled.value = window.scrollY > 16;
+  hasScrolled.value = window.scrollY > SCROLLED_THRESHOLD;
 }
 
 function onDocumentKeydown(event) {
@@ -1068,6 +1069,86 @@ onBeforeUnmount(deactivateHeader);
   }
   .brand-name {
     line-height: 1.15;
+  }
+}
+
+/* ============================================================
+   v5.0 · Stable scroll shell — scrolling only shows or hides it
+   ============================================================ */
+.header,
+.header--scrolled {
+  background: color-mix(in srgb, var(--app-bg) 97%, transparent);
+  border: 0;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--app-border) 48%, transparent);
+  backdrop-filter: none;
+}
+.header {
+  transition: transform 180ms var(--app-ease);
+}
+.header-inner,
+.header--scrolled .header-inner {
+  height: 70px;
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  transition: none;
+}
+.header--scrolled .brand-subtitle {
+  max-height: 18px;
+  opacity: 1;
+  transform: none;
+}
+
+/* ============================================================
+   v5.2 · Quiet, coordinated brand interaction
+   Keep the identity legible without turning it into a hover card.
+   ============================================================ */
+.brand-link {
+  box-shadow: none;
+  transition: none;
+}
+.app-logo::before,
+.app-logo::after {
+  display: none;
+}
+.brand-copy {
+  transition: transform 180ms var(--app-ease);
+}
+.brand-name,
+.brand-subtitle {
+  transition: color 160ms ease;
+}
+.brand-name {
+  background-image: linear-gradient(90deg, color-mix(in srgb, var(--accent) 72%, transparent), color-mix(in srgb, var(--accent) 18%, transparent));
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 0 1px;
+  transition:
+    color 160ms ease,
+    background-size 220ms var(--app-ease);
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .brand-link:hover {
+    box-shadow: none;
+  }
+  .brand-link:hover .app-logo {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--accent-line) 76%, var(--app-border));
+    box-shadow: 0 5px 16px color-mix(in srgb, var(--accent) 11%, transparent);
+  }
+  .brand-link:hover .brand-copy {
+    transform: translateX(2px);
+  }
+  .brand-link:hover .brand-name {
+    color: color-mix(in srgb, var(--accent) 38%, var(--app-text));
+    background-size: 28px 1px;
+  }
+  .brand-link:hover .brand-subtitle {
+    color: color-mix(in srgb, var(--accent) 48%, var(--app-text-muted));
   }
 }
 </style>

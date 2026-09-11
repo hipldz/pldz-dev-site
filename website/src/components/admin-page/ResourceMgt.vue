@@ -17,9 +17,7 @@
           </option>
         </select>
         <input v-model.trim="keyword" type="search" placeholder="搜索路径或文件名" />
-        <button class="btn btn-outline" type="button" :disabled="isLoading" @click="loadResources">
-          刷新
-        </button>
+        <button class="btn btn-outline" type="button" :disabled="isLoading" @click="loadResources">刷新</button>
       </div>
 
       <div v-if="isLoading" class="loading-stack">
@@ -72,11 +70,7 @@ const selectedCategory = ref(typeof route.query.category === "string" ? route.qu
 const errorMessage = ref("");
 const { isLoading, start, stop } = useLoading("admin.resource.list");
 
-const categories = computed(() =>
-  [...new Set(files.value.map((file) => file.category).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b)
-  )
-);
+const categories = computed(() => [...new Set(files.value.map((file) => file.category).filter(Boolean))].sort((a, b) => a.localeCompare(b)));
 
 const filteredFiles = computed(() => {
   const query = keyword.value.toLocaleLowerCase();
@@ -100,7 +94,7 @@ watch(
   (category) => {
     const nextCategory = typeof category === "string" ? category : "";
     if (nextCategory !== selectedCategory.value) selectedCategory.value = nextCategory;
-  }
+  },
 );
 
 function resourceUrl(file) {

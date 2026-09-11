@@ -23,6 +23,7 @@ TWO_FACTOR_ISSUER = settings.two_factor_issuer
 ACCESS_EXPIRE = timedelta(minutes=settings.access_token_expire_minutes)
 REFRESH_EXPIRE = timedelta(days=settings.refresh_token_expire_days)
 
+
 class AuthenticationError(Exception):
     """An access token is missing, invalid or expired."""
 

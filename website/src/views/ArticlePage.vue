@@ -17,11 +17,14 @@
     <!-- 中间内容区 -->
     <main class="content article-shell">
       <header class="article-header card-surface">
-        <div class="article-kicker" aria-label="文章信息">
-          <span class="article-signature" aria-hidden="true">✦</span>
-          <span>ARTICLE</span>
-          <i>/</i>
-          <span>{{ article.meta.category || "NOTE" }}</span>
+        <div class="article-topline">
+          <div class="article-kicker" aria-label="文章信息">
+            <span class="article-signature" aria-hidden="true">✦</span>
+            <span>ARTICLE</span>
+            <i>/</i>
+            <span>{{ article.meta.category || "NOTE" }}</span>
+          </div>
+          <p class="layout-handnote article-handnote" aria-hidden="true">Read, think, write.</p>
         </div>
         <h1 class="article-title">{{ article.meta.title }}</h1>
         <div class="article-meta">
@@ -50,15 +53,14 @@
 
   <div class="fab-container" aria-label="文章快捷操作">
     <div class="fab-actions">
-      <button v-burst="'soft'" class="fab-item fab-scroll" type="button" @click="onToTop" id="to-top" title="回到顶部" aria-label="回到顶部">
+      <button class="fab-item fab-scroll" type="button" @click="onToTop" id="to-top" title="回到顶部" aria-label="回到顶部">
         <span class="fab-emoji" aria-hidden="true">✦</span><span class="fab-direction" aria-hidden="true">↑</span>
       </button>
-      <button v-burst="'soft'" class="fab-item fab-scroll" type="button" @click="onToBottom" id="to-bottom" title="前往底部" aria-label="前往底部">
+      <button class="fab-item fab-scroll" type="button" @click="onToBottom" id="to-bottom" title="前往底部" aria-label="前往底部">
         <span class="fab-emoji" aria-hidden="true">✦</span><span class="fab-direction" aria-hidden="true">↓</span>
       </button>
       <button
         v-show="article.meta.csdn"
-        v-burst="'soft'"
         class="fab-item csdn-icon fab-brand"
         type="button"
         id="to-csdn"
@@ -68,7 +70,6 @@
       ></button>
       <button
         v-show="article.meta.juejin"
-        v-burst="'soft'"
         class="fab-item juejin-icon fab-brand"
         type="button"
         id="to-juejin"
@@ -78,7 +79,6 @@
       ></button>
       <button
         v-show="article.meta.github"
-        v-burst="'soft'"
         class="fab-item github-icon fab-brand"
         type="button"
         id="to-github"
@@ -88,7 +88,6 @@
       ></button>
       <button
         v-show="article.meta.gitee"
-        v-burst="'soft'"
         class="fab-item gitee-icon fab-brand"
         type="button"
         id="to-gitee"
@@ -349,7 +348,7 @@ watch(
 @import url("../assets/views/main-container.css");
 
 :global(body) {
-  background: var(--app-bg);
+  background: radial-gradient(circle at 84% 9%, color-mix(in srgb, var(--accent) 4.5%, transparent), transparent 27rem), var(--app-bg);
   color: var(--app-text);
 }
 
@@ -1800,6 +1799,59 @@ watch(
   }
   .fab-brand {
     display: none !important;
+  }
+}
+
+/* ============================================================
+   v5.0 · Shared editorial header language
+   ============================================================ */
+.article-layout {
+  width: min(1180px, calc(100% - 2 * var(--app-page-gutter)));
+  max-width: 1180px;
+  padding-top: 110px;
+}
+.article-topline {
+  min-height: 36px;
+  margin-bottom: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+.article-topline .article-kicker {
+  min-width: 0;
+  margin-bottom: 0;
+}
+.article-handnote {
+  flex: 0 0 auto;
+  font-size: clamp(22px, 1.8vw, 27px);
+}
+.article-handnote::after {
+  width: 34px;
+}
+.article-header {
+  padding-top: 0;
+}
+
+@media (max-width: 700px), (max-width: 840px) and (pointer: coarse) {
+  .article-layout {
+    padding-top: 82px !important;
+  }
+  .article-topline {
+    min-height: 30px;
+    margin-bottom: 10px;
+    display: block;
+  }
+}
+
+/* v5.1 · Reading hover stays subordinate to the text. */
+@media (hover: hover) and (pointer: fine) {
+  .markdown-body :deep(.markdown-image-link:hover img) {
+    transform: scale(1.003);
+    filter: saturate(1.01);
+  }
+  .fab-item:hover {
+    transform: translateY(-1px);
   }
 }
 </style>

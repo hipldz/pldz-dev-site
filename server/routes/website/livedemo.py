@@ -6,6 +6,7 @@ from routes.dependencies import current_user, ensure_admin_user
 
 LIVEDEMO_ROUTER = APIRouter(prefix="/website/livedemo", tags=["website-livedemo"])
 
+
 @LIVEDEMO_ROUTER.get("/all")
 async def api_get_all_livedemo_items():
     """

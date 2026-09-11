@@ -1,9 +1,7 @@
 <template>
   <div class="catalog-card">
     <div class="catalog-card-header">
-      <div>
-        <span class="catalog-eyebrow">ON THIS PAGE</span><strong>文章目录</strong>
-      </div>
+      <div><span class="catalog-eyebrow">ON THIS PAGE</span><strong>文章目录</strong></div>
       <span class="progress">{{ progress }}</span>
     </div>
 
@@ -80,7 +78,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.catalog-card { padding-top: 2px; }
+.catalog-card {
+  padding-top: 2px;
+}
 .catalog-card-header {
   margin-bottom: 14px;
   display: flex;
@@ -88,13 +88,16 @@ onUnmounted(() => {
   justify-content: space-between;
   gap: 12px;
 }
-.catalog-card-header > div { display: grid; gap: 4px; }
+.catalog-card-header > div {
+  display: grid;
+  gap: 4px;
+}
 .catalog-eyebrow {
   color: var(--app-text-soft);
   font-family: var(--font-mono);
   font-size: 8px;
   font-weight: 720;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
   line-height: 1.3;
 }
 .catalog-card-header strong {
@@ -116,7 +119,7 @@ onUnmounted(() => {
   font-family: var(--font-mono);
   font-size: 8px;
   font-weight: 680;
-  letter-spacing: .04em;
+  letter-spacing: 0.04em;
 }
 .catalog-content {
   position: relative;
@@ -124,7 +127,10 @@ onUnmounted(() => {
   padding-right: 4px;
   overflow-y: auto;
 }
-.catalog-list { display: grid; gap: 2px; }
+.catalog-list {
+  display: grid;
+  gap: 2px;
+}
 .catalog-link {
   position: relative;
   width: 100%;
@@ -141,7 +147,10 @@ onUnmounted(() => {
   text-align: left;
   text-overflow: ellipsis;
   cursor: pointer;
-  transition: color 180ms ease, background-color 180ms ease, transform 220ms cubic-bezier(.16,1,.3,1);
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .catalog-link::before {
   content: "";
@@ -153,7 +162,10 @@ onUnmounted(() => {
   border-radius: 50%;
   background: var(--app-border-strong);
   transform: translateY(-50%);
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 .catalog-link:hover {
   color: var(--app-text);
@@ -169,23 +181,59 @@ onUnmounted(() => {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 8%, transparent);
   transform: translateY(-50%) scale(1.05);
 }
-.catalog-link--depth-2 { padding-left: 24px; font-size: 11px; }
-.catalog-link--depth-2::before { left: 12px; }
-.catalog-link--depth-3 { padding-left: 32px; font-size: 10.5px; }
-.catalog-link--depth-3::before { left: 20px; }
+.catalog-link--depth-2 {
+  padding-left: 24px;
+  font-size: 11px;
+}
+.catalog-link--depth-2::before {
+  left: 12px;
+}
+.catalog-link--depth-3 {
+  padding-left: 32px;
+  font-size: 10.5px;
+}
+.catalog-link--depth-3::before {
+  left: 20px;
+}
 .catalog-link--depth-4,
 .catalog-link--depth-5,
-.catalog-link--depth-6 { padding-left: 38px; font-size: 10.5px; }
+.catalog-link--depth-6 {
+  padding-left: 38px;
+  font-size: 10.5px;
+}
 .catalog-link--depth-4::before,
 .catalog-link--depth-5::before,
-.catalog-link--depth-6::before { left: 26px; }
-.catalog-empty { padding: 8px 0; color: var(--app-text-soft); font-size: 11px; }
-.catalog-content::-webkit-scrollbar { width: 3px; }
-.catalog-content::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--app-text-soft) 24%, transparent); border-radius: 999px; }
-.catalog-content::-webkit-scrollbar-track { background: transparent; }
+.catalog-link--depth-6::before {
+  left: 26px;
+}
+.catalog-empty {
+  padding: 8px 0;
+  color: var(--app-text-soft);
+  font-size: 11px;
+}
+.catalog-content::-webkit-scrollbar {
+  width: 3px;
+}
+.catalog-content::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--app-text-soft) 24%, transparent);
+  border-radius: 999px;
+}
+.catalog-content::-webkit-scrollbar-track {
+  background: transparent;
+}
 @media (max-width: 768px) {
-  .catalog-card { padding-top: 0; }
-  .catalog-content { max-height: none; padding-right: 0; }
-  .catalog-link { min-height: 42px; display: flex; align-items: center; font-size: 13px; }
+  .catalog-card {
+    padding-top: 0;
+  }
+  .catalog-content {
+    max-height: none;
+    padding-right: 0;
+  }
+  .catalog-link {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+  }
 }
 </style>

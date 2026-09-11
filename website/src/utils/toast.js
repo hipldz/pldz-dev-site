@@ -55,4 +55,3 @@ export default class Toast {
     showToast(messages, "error");
   }
 }
-

@@ -8,7 +8,7 @@
 
   <div class="home-page">
     <main class="home-main">
-      <section v-field id="hero" class="hero-section" aria-labelledby="home-title">
+      <section id="hero" class="hero-section" aria-labelledby="home-title">
         <div class="hero-aurora hero-aurora--a" data-motion-layer="0.42" aria-hidden="true"></div>
         <div class="hero-aurora hero-aurora--b" data-motion-layer="-0.36" aria-hidden="true"></div>
         <div class="hero-grid" aria-hidden="true"></div>
@@ -25,12 +25,11 @@
               <span class="hero-description__mobile">项目、教程与技术笔记。</span>
             </p>
             <div class="hero-actions">
-              <a v-magnetic="10" v-burst class="button-primary hero-button hero-button--primary" href="/articles"
+              <a v-magnetic="10" class="button-primary hero-button hero-button--primary" href="/articles"
                 ><span>浏览项目教程</span><span class="material-symbols-rounded ui-icon" aria-hidden="true">arrow_forward</span></a
               >
               <a
                 v-magnetic="8"
-                v-burst
                 class="button-ghost hero-button"
                 href="/livedemo"
                 data-analytics-cta="live_demo"
@@ -70,19 +69,19 @@
         </div>
       </section>
 
-      <section v-reveal v-spotlight id="live-demo" class="demo-lab-section experiment-roadmap-section" aria-labelledby="demo-lab-title">
+      <section v-reveal id="live-demo" class="demo-lab-section experiment-roadmap-section" aria-labelledby="demo-lab-title">
         <div class="section-heading section-heading--lab roadmap-heading" data-reveal-item>
           <div class="section-heading__copy">
             <p class="section-kicker">Live demo</p>
             <h2 id="demo-lab-title">在线预览</h2>
           </div>
           <div class="section-heading-side">
-            <a v-burst class="section-link" href="/livedemo">全部 Demo<span class="material-symbols-rounded ui-icon" aria-hidden="true">arrow_forward</span></a>
+            <a class="section-link" href="/livedemo">全部 Demo<span class="material-symbols-rounded ui-icon" aria-hidden="true">arrow_forward</span></a>
           </div>
           <span class="section-handnote" aria-hidden="true">Build, test, learn.</span>
         </div>
 
-        <a v-burst="'soft'" class="mobile-demo-teaser" href="/livedemo" aria-label="进入 Live Demo 实验室">
+        <a class="mobile-demo-teaser" href="/livedemo" aria-label="进入 Live Demo 实验室">
           <span class="mobile-demo-teaser__visual" aria-hidden="true">
             <img :src="selectedDemo.thumbnail || '/404.jpg'" alt="" loading="lazy" decoding="async" />
             <span class="mobile-demo-teaser__spark"></span>
@@ -111,7 +110,6 @@
             <button
               v-for="(demo, index) in demos"
               :key="demo.folder || demo.title || index"
-              v-burst="'soft'"
               :class="['roadmap-stop', { 'is-active': index === activeDemoIndex }]"
               type="button"
               :aria-current="index === activeDemoIndex ? 'true' : undefined"
@@ -135,7 +133,6 @@
                 <p class="roadmap-focus__description">{{ selectedDemo.description }}</p>
                 <div class="roadmap-focus__actions">
                   <a
-                    v-burst
                     class="roadmap-primary"
                     :href="selectedDemo.url || '/livedemo'"
                     target="_blank"
@@ -146,12 +143,11 @@
                   >
                     <span>打开这个 Demo</span><span class="material-symbols-rounded" aria-hidden="true">arrow_outward</span>
                   </a>
-                  <a v-burst="'soft'" class="roadmap-secondary" href="/livedemo">浏览全部 Demo</a>
+                  <a class="roadmap-secondary" href="/livedemo">浏览全部 Demo</a>
                 </div>
               </div>
 
               <a
-                v-depth="0.72"
                 v-cursor="'OPEN'"
                 class="roadmap-preview"
                 :href="selectedDemo.url || '/livedemo'"
@@ -178,14 +174,14 @@
         </div>
       </section>
 
-      <section v-reveal v-spotlight id="notes" class="blog-section" aria-labelledby="blog-title">
+      <section v-reveal id="notes" class="blog-section" aria-labelledby="blog-title">
         <div class="section-heading section-heading--notes" data-reveal-item>
           <div class="section-heading__copy">
             <p class="section-kicker">Notes</p>
             <h2 id="blog-title">最近更新</h2>
           </div>
           <div class="section-heading-side">
-            <a v-burst class="section-link" href="/articles">全部文章<span class="material-symbols-rounded ui-icon" aria-hidden="true">arrow_forward</span></a>
+            <a class="section-link" href="/articles">全部文章<span class="material-symbols-rounded ui-icon" aria-hidden="true">arrow_forward</span></a>
           </div>
           <span class="section-handnote" aria-hidden="true">Read, think, write.</span>
         </div>
@@ -199,32 +195,24 @@
                 <span v-if="article.date">{{ article.date }}</span>
               </div>
               <h3>
-                <a v-burst="'soft'" :href="article.tutorialLink">{{ article.title }}</a>
+                <a :href="article.tutorialLink">{{ article.title }}</a>
               </h3>
               <p>{{ article.description }}</p>
             </div>
-            <a
-              v-depth="0.46"
-              v-burst="'soft'"
-              v-cursor="'READ'"
-              data-reveal-media
-              class="note-row__media"
-              :href="article.tutorialLink"
-              :aria-label="article.title"
-            >
+            <a v-cursor="'READ'" data-reveal-media class="note-row__media" :href="article.tutorialLink" :aria-label="article.title">
               <img :src="article.cover" :alt="article.title" loading="lazy" decoding="async" />
             </a>
-            <a v-burst="'soft'" class="note-row__arrow" :href="article.tutorialLink" aria-label="阅读全文">
+            <a class="note-row__arrow" :href="article.tutorialLink" aria-label="阅读全文">
               <span class="material-symbols-rounded" aria-hidden="true">arrow_outward</span>
             </a>
           </article>
         </div>
       </section>
 
-      <section v-reveal v-spotlight id="about" class="about-panel" aria-labelledby="about-title">
+      <section v-reveal id="about" class="about-panel" aria-labelledby="about-title">
         <div class="about-profile" data-reveal-item>
           <div class="about-profile__copy">
-            <h2 id="about-title">ABOUT ME</h2>
+            <h2 id="about-title">ABOUT</h2>
             <p class="about-lead">持续更新一些东西,记录自己做的事情。</p>
             <p class="about-intro">项目、工具、页面实验与部署笔记。</p>
           </div>
@@ -241,37 +229,37 @@
           <div class="about-directory__heading">
             <div>
               <p class="about-directory__eyebrow">Elsewhere</p>
-              <h3>其他平台</h3>
+              <h3>Find me on other platforms</h3>
               <p class="about-directory__hint">不同的平台放不同的内容，偶尔更新，也欢迎来逛逛。</p>
             </div>
           </div>
 
           <div class="about-links" aria-label="我的公开主页与内容">
-            <a v-burst="'soft'" v-cursor="'VISIT'" class="about-card" href="https://blog.csdn.net/qq_42727752" target="_blank" rel="noopener noreferrer">
+            <a v-cursor="'VISIT'" class="about-card" href="https://blog.csdn.net/qq_42727752" target="_blank" rel="noopener noreferrer">
               <span class="about-card__icon"><img :src="csdnIcon" alt="" aria-hidden="true" /></span>
               <span class="about-card__copy"><strong>CSDN</strong><small>技术文章</small><span>记录技术思考与实践</span></span>
               <span class="material-symbols-rounded about-card__arrow" aria-hidden="true">arrow_forward</span>
             </a>
 
-            <a v-burst="'soft'" v-cursor="'VISIT'" class="about-card" href="https://juejin.cn/user/2590907894607726" target="_blank" rel="noopener noreferrer">
+            <a v-cursor="'VISIT'" class="about-card" href="https://juejin.cn/user/2590907894607726" target="_blank" rel="noopener noreferrer">
               <span class="about-card__icon"><img :src="juejinIcon" alt="" aria-hidden="true" /></span>
               <span class="about-card__copy"><strong>掘金</strong><small>前端笔记</small><span>前端、工程化与工具</span></span>
               <span class="material-symbols-rounded about-card__arrow" aria-hidden="true">arrow_forward</span>
             </a>
 
-            <a v-burst="'soft'" v-cursor="'VISIT'" class="about-card" :href="githubLink" target="_blank" rel="noopener noreferrer">
+            <a v-cursor="'VISIT'" class="about-card" :href="githubLink" target="_blank" rel="noopener noreferrer">
               <span class="about-card__icon"><img :src="githubIcon" alt="" aria-hidden="true" /></span>
               <span class="about-card__copy"><strong>GitHub</strong><small>开源项目</small><span>代码、项目与实验</span></span>
               <span class="material-symbols-rounded about-card__arrow" aria-hidden="true">arrow_forward</span>
             </a>
 
-            <a v-burst="'soft'" v-cursor="'VISIT'" class="about-card" href="https://gitee.com/pldz" target="_blank" rel="noopener noreferrer">
+            <a v-cursor="'VISIT'" class="about-card" href="https://gitee.com/pldz" target="_blank" rel="noopener noreferrer">
               <span class="about-card__icon"><img :src="giteeIcon" alt="" aria-hidden="true" /></span>
               <span class="about-card__copy"><strong>Gitee</strong><small>国内镜像</small><span>同步开源项目与代码</span></span>
               <span class="material-symbols-rounded about-card__arrow" aria-hidden="true">arrow_forward</span>
             </a>
 
-            <a v-burst="'soft'" v-cursor="'VISIT'" class="about-card" href="https://space.bilibili.com/438387423" target="_blank" rel="noopener noreferrer">
+            <a v-cursor="'VISIT'" class="about-card" href="https://space.bilibili.com/438387423" target="_blank" rel="noopener noreferrer">
               <span class="about-card__icon"><img :src="bilibiliIcon" alt="" aria-hidden="true" /></span>
               <span class="about-card__copy"><strong>Bilibili</strong><small>视频内容</small><span>教程、演示与生活</span></span>
               <span class="material-symbols-rounded about-card__arrow" aria-hidden="true">arrow_forward</span>
@@ -308,7 +296,7 @@ import csdnIcon from "../assets/svgs/csdn.png";
 import juejinIcon from "../assets/svgs/juejin.svg";
 import githubIcon from "../assets/svgs/github.svg";
 import giteeIcon from "../assets/svgs/gitee.svg";
-import bilibiliIcon from "../assets/svgs/bilibili.png";
+import bilibiliIcon from "../assets/svgs/bilibili.svg";
 import { getAllLiveDemos, getAllArticles } from "../utils/apis";
 
 const isMobileMenuOpen = ref(false);
@@ -1260,7 +1248,7 @@ onBeforeUnmount(() => {
   margin: 3px 0 0;
   color: var(--app-text);
   font-family: var(--font-display);
-  font-size: clamp(34px, 3.15vw, 43px);
+  font-size: clamp(28px, 2.6vw, 36px);
   font-weight: 670;
   line-height: 1.14;
   letter-spacing: -0.045em;
@@ -3609,14 +3597,14 @@ onBeforeUnmount(() => {
 }
 .about-card__icon {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   width: 64px;
   min-width: 64px;
   height: 54px;
   margin-top: 0;
   padding: 8px 10px;
   border-radius: 17px;
-  background: color-mix(in srgb, var(--app-surface) 94%, transparent);
+  background: #fff;
   box-shadow:
     0 12px 30px rgba(34, 46, 70, 0.07),
     inset 0 1px 0 rgba(255, 255, 255, 0.78);
@@ -7013,6 +7001,47 @@ onBeforeUnmount(() => {
   .about-card__copy strong,
   .about-card__copy small {
     max-width: 100% !important;
+  }
+}
+
+/* v5.0 · Hover stays local: no sibling dimming or large-surface lift. */
+@media (hover: hover) and (pointer: fine) {
+  .notes-stack:has(.note-row:hover) .note-row:not(:hover) {
+    opacity: 1;
+  }
+  .note-row:hover {
+    transform: none;
+  }
+  .note-row:hover .note-row__media img {
+    transform: scale(1.008);
+  }
+  .note-row:hover .note-row__arrow {
+    transform: translate(1px, -1px);
+  }
+  .roadmap-stop:hover .roadmap-stop__node {
+    transform: none;
+  }
+  .roadmap-preview:hover::before {
+    opacity: 0.42;
+    transform: translateX(4%);
+  }
+  .roadmap-preview:hover .roadmap-preview__media img {
+    transform: scale(1.006);
+  }
+  .roadmap-primary:hover {
+    transform: none;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+  .about-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .about-card:hover::before {
+    opacity: 0.42;
+  }
+  .about-card:hover .about-card__icon {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 18px rgba(34, 46, 70, 0.065) !important;
   }
 }
 </style>

@@ -367,15 +367,14 @@ onBeforeUnmount(() => {
   border-radius: var(--app-radius-md);
   font-weight: 500;
   cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
 }
 
 .auth-container button:hover {
   transform: none;
-}
-
-.auth-container button:active {
-  transform: translateY(0);
 }
 
 .action-buttons {
@@ -543,7 +542,10 @@ onBeforeUnmount(() => {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .profile-actions button:hover {
@@ -609,7 +611,9 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 768px) {
-  .auth-container input { font-size: 16px; }
+  .auth-container input {
+    font-size: 16px;
+  }
 }
 
 /* v4.1 · auth modal on phones */
@@ -618,18 +622,32 @@ onBeforeUnmount(() => {
     align-items: flex-end !important;
     padding: 68px 8px 8px !important;
   }
-  .auth-container, .info-card {
+  .auth-container,
+  .info-card {
     width: 100% !important;
     max-height: calc(100dvh - 76px) !important;
     overflow-y: auto !important;
     border-radius: 22px !important;
   }
-  .auth-header { padding: 20px 18px 16px !important; margin-bottom: 6px !important; }
-  .auth-container form { padding: 0 18px 20px !important; }
-  .auth-container .error { padding-inline: 18px !important; }
-  .info-card { padding: 0 18px 20px !important; }
-  .auth-container input { height: 50px !important; font-size: 16px !important; }
-  .auth-container button { min-height: 46px !important; }
+  .auth-header {
+    padding: 20px 18px 16px !important;
+    margin-bottom: 6px !important;
+  }
+  .auth-container form {
+    padding: 0 18px 20px !important;
+  }
+  .auth-container .error {
+    padding-inline: 18px !important;
+  }
+  .info-card {
+    padding: 0 18px 20px !important;
+  }
+  .auth-container input {
+    height: 50px !important;
+    font-size: 16px !important;
+  }
+  .auth-container button {
+    min-height: 46px !important;
+  }
 }
-
 </style>

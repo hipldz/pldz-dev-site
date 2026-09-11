@@ -1,6 +1,9 @@
 /* Shared interaction states. No layout animation, blur or perpetual motion. */
 :root :is(input:not([type="file"]), textarea, select) {
-  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 :root :is(input:not([type="file"]), textarea, select):focus-visible {
@@ -19,7 +22,9 @@
   }
 
   :root :is(.button-primary, .btn-primary, .btn-info, .btn-login):hover:not(:disabled) {
-    box-shadow: var(--app-shadow-button), 0 4px 10px color-mix(in srgb, var(--accent) 16%, transparent);
+    box-shadow:
+      var(--app-shadow-button),
+      0 4px 10px color-mix(in srgb, var(--accent) 16%, transparent);
   }
 }
 
@@ -34,17 +39,15 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  :root :is(.button-primary, .button-secondary, .button-ghost, .btn, .sort-chip, .page-button, .page-number,
-    .theme-trigger, .login-register-btn, .search-trigger, .key-chip, .card-actions button,
-    .input-area > button, .auth-container .action-buttons button):active:not(:disabled) {
-    transform: translateY(1px) scale(0.98);
-  }
-
-  .auth-overlay, .overlay > .backdrop, .fullscreen-overlay {
+  .auth-overlay,
+  .overlay > .backdrop,
+  .fullscreen-overlay {
     animation: app-fade-in 180ms ease-out;
   }
 
-  .auth-container:not(.loading), .info-card, .fullscreen-panel {
+  .auth-container:not(.loading),
+  .info-card,
+  .fullscreen-panel {
     animation: app-panel-in 260ms var(--app-ease);
   }
 
@@ -55,27 +58,48 @@
 }
 
 @keyframes app-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes app-panel-in {
-  from { opacity: 0; translate: 0 8px; }
-  to { opacity: 1; translate: 0 0; }
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
 }
 
 @keyframes app-popover-in {
-  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 :root :is(.home-page .article-row, .category-card, .live-demo-card, .project-card, .demo-card) {
-  transition: transform 240ms var(--app-ease), border-color 180ms ease, box-shadow 240ms var(--app-ease);
+  transition:
+    transform 240ms var(--app-ease),
+    border-color 180ms ease,
+    box-shadow 240ms var(--app-ease);
 }
 
 .fab-item {
   cursor: pointer;
-  transition: transform 180ms var(--app-ease), background-color 180ms ease;
+  transition:
+    transform 180ms var(--app-ease),
+    background-color 180ms ease;
 }
 
 /* Signature section spotlight: a tiny logo-derived spark and a faint guide line. */
@@ -94,12 +118,14 @@
   opacity: 0;
   pointer-events: none;
   clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
-  transform: translateY(6px) scale(.55) rotate(-18deg);
-  transition: opacity 260ms var(--app-ease), transform 320ms var(--app-ease);
+  transform: translateY(6px) scale(0.55) rotate(-18deg);
+  transition:
+    opacity 260ms var(--app-ease),
+    transform 320ms var(--app-ease);
 }
 
 [data-spotlight].is-spotlight > .spotlight-spark {
-  opacity: .68;
+  opacity: 0.68;
   transform: translateY(0) scale(1) rotate(0deg);
 }
 
@@ -109,17 +135,35 @@ html.command-palette-open body {
 }
 
 @media (max-width: 1180px) {
-  [data-spotlight] > .spotlight-spark { display: none; }
+  [data-spotlight] > .spotlight-spark {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .command-backdrop { animation: app-fade-in 150ms ease-out; }
-  .command-panel { animation: command-panel-in 220ms var(--app-ease); }
+  .command-backdrop {
+    animation: app-fade-in 150ms ease-out;
+  }
+  .command-panel {
+    animation: command-panel-in 220ms var(--app-ease);
+  }
 }
 @keyframes command-panel-in {
-  from { opacity: 0; translate: -50% 14px; scale: .965; }
-  72% { opacity: 1; translate: -50% -1px; scale: 1.006; }
-  to { opacity: 1; translate: -50% 0; scale: 1; }
+  from {
+    opacity: 0;
+    translate: -50% 14px;
+    scale: 0.965;
+  }
+  72% {
+    opacity: 1;
+    translate: -50% -1px;
+    scale: 1.006;
+  }
+  to {
+    opacity: 1;
+    translate: -50% 0;
+    scale: 1;
+  }
 }
 
 /* ============================================================
@@ -127,16 +171,28 @@ html.command-palette-open body {
    One active pointer surface at a time; no canvas, no blur filters, no timers.
    ============================================================ */
 .motion-magnetic {
-  transition: translate 260ms cubic-bezier(.16, 1, .3, 1), transform 180ms var(--app-ease), background-color 180ms var(--app-ease), border-color 180ms var(--app-ease), color 180ms var(--app-ease), box-shadow 220ms var(--app-ease);
+  transition:
+    translate 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 180ms var(--app-ease),
+    background-color 180ms var(--app-ease),
+    border-color 180ms var(--app-ease),
+    color 180ms var(--app-ease),
+    box-shadow 220ms var(--app-ease);
   will-change: auto;
 }
-.motion-magnetic.is-magnetic { will-change: translate; }
+.motion-magnetic.is-magnetic {
+  will-change: translate;
+}
 
 .motion-depth {
   position: relative;
   overflow: clip;
   isolation: isolate;
-  transition: translate 320ms cubic-bezier(.16, 1, .3, 1), transform 220ms var(--app-ease), border-color 180ms var(--app-ease), box-shadow 260ms var(--app-ease);
+  transition:
+    translate 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 220ms var(--app-ease),
+    border-color 180ms var(--app-ease),
+    box-shadow 260ms var(--app-ease);
 }
 .motion-depth__light {
   position: absolute;
@@ -148,12 +204,19 @@ html.command-palette-open body {
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
-  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 10%, transparent) 0%, color-mix(in srgb, var(--accent) 3%, transparent) 44%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 10%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 3%, transparent) 44%,
+    transparent 70%
+  );
   transform: translate3d(-260px, -260px, 0);
   transition: opacity 260ms var(--app-ease);
   will-change: transform;
 }
-.motion-depth.is-depth-active > .motion-depth__light { opacity: 1; }
+.motion-depth.is-depth-active > .motion-depth__light {
+  opacity: 1;
+}
 
 .motion-field {
   position: relative;
@@ -169,14 +232,21 @@ html.command-palette-open body {
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
-  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 11%, transparent) 0%, color-mix(in srgb, var(--brand-support) 4%, transparent) 48%, transparent 72%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 11%, transparent) 0%,
+    color-mix(in srgb, var(--brand-support) 4%, transparent) 48%,
+    transparent 72%
+  );
   transform: translate3d(-420px, -420px, 0);
   transition: opacity 360ms var(--app-ease);
   will-change: transform;
 }
-.motion-field.is-field-active > .motion-field__light { opacity: .9; }
+.motion-field.is-field-active > .motion-field__light {
+  opacity: 0.9;
+}
 [data-motion-layer] {
-  transition: translate 520ms cubic-bezier(.16, 1, .3, 1);
+  transition: translate 520ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .motion-field.is-field-active [data-motion-layer] {
   transition-duration: 80ms;
@@ -193,38 +263,62 @@ html.command-palette-open body {
   opacity: 0;
   pointer-events: none;
   background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 52%, transparent), transparent);
-  transform: scaleY(.2);
+  transform: scaleY(0.2);
   transform-origin: top;
-  transition: opacity 240ms var(--app-ease), transform 420ms cubic-bezier(.16,1,.3,1);
+  transition:
+    opacity 240ms var(--app-ease),
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 [data-spotlight].is-spotlight > .spotlight-guide {
-  opacity: .45;
+  opacity: 0.45;
   transform: scaleY(1);
 }
 
 /* Native same-origin navigation transition where browsers support it. */
-@view-transition { navigation: auto; }
-::view-transition-old(root) { animation: app-page-out 150ms ease both; }
-::view-transition-new(root) { animation: app-page-in 280ms cubic-bezier(.16,1,.3,1) both; }
-@keyframes app-page-out { to { opacity: .72; transform: scale(.997); } }
-@keyframes app-page-in { from { opacity: .68; transform: translateY(4px) scale(.998); } }
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root) {
+  animation: app-page-out 150ms ease both;
+}
+::view-transition-new(root) {
+  animation: app-page-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes app-page-out {
+  to {
+    opacity: 0.72;
+    transform: scale(0.997);
+  }
+}
+@keyframes app-page-in {
+  from {
+    opacity: 0.68;
+    transform: translateY(4px) scale(0.998);
+  }
+}
 
 @media (hover: none), (pointer: coarse) {
   .motion-depth__light,
-  .motion-field__light { display: none; }
+  .motion-field__light {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .motion-depth__light,
   .motion-field__light,
-  [data-spotlight] > .spotlight-guide { display: none !important; }
+  [data-spotlight] > .spotlight-guide {
+    display: none !important;
+  }
 }
 
 /* ============================================================
    v2.9 · VISUAL SIGNATURE
    More visible depth and light, still compositor-first and touch-safe.
    ============================================================ */
-.motion-reveal-root { --reveal-shift: 24px; }
+.motion-reveal-root {
+  --reveal-shift: 24px;
+}
 
 [data-spotlight] {
   isolation: isolate;
@@ -238,9 +332,11 @@ html.command-palette-open body {
   pointer-events: none;
   opacity: 0;
   background: radial-gradient(460px circle at var(--spot-x) var(--spot-y), color-mix(in srgb, var(--accent) 7%, transparent), transparent 68%);
-  transition: opacity 420ms cubic-bezier(.16,1,.3,1);
+  transition: opacity 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-[data-spotlight].is-spotlight.is-spotlight-pointer > .spotlight-aura { opacity: .9; }
+[data-spotlight].is-spotlight.is-spotlight-pointer > .spotlight-aura {
+  opacity: 0.9;
+}
 
 /* The old marker is now a clearer brand-signature cue. */
 [data-spotlight] > .spotlight-spark {
@@ -251,21 +347,34 @@ html.command-palette-open body {
   box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 0%, transparent);
 }
 [data-spotlight].is-spotlight > .spotlight-spark {
-  opacity: .86;
+  opacity: 0.86;
   box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 7%, transparent);
 }
-[data-spotlight] > .spotlight-guide { height: 74px; opacity: 0; }
-[data-spotlight].is-spotlight > .spotlight-guide { opacity: .62; }
+[data-spotlight] > .spotlight-guide {
+  height: 74px;
+  opacity: 0;
+}
+[data-spotlight].is-spotlight > .spotlight-guide {
+  opacity: 0.62;
+}
 
 .motion-depth {
   transform-style: preserve-3d;
   transform-origin: 50% 50%;
-  transition: transform 420ms cubic-bezier(.16,1,.3,1), border-color 220ms ease, box-shadow 360ms cubic-bezier(.16,1,.3,1);
+  transition:
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 220ms ease,
+    box-shadow 360ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .motion-depth__light {
   width: 380px;
   height: 380px;
-  background: radial-gradient(circle, color-mix(in srgb, #fff 52%, var(--accent) 9%) 0%, color-mix(in srgb, var(--accent) 9%, transparent) 28%, transparent 68%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, #fff 52%, var(--accent) 9%) 0%,
+    color-mix(in srgb, var(--accent) 9%, transparent) 28%,
+    transparent 68%
+  );
   mix-blend-mode: soft-light;
   transform: translate3d(-420px, -420px, 0);
   transition: opacity 280ms ease;
@@ -279,28 +388,53 @@ html.command-palette-open body {
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
-  background: linear-gradient(var(--rim-angle), transparent 12%, color-mix(in srgb, var(--accent) 42%, #fff) 47%, rgba(255,255,255,.76) 52%, transparent 78%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  background: linear-gradient(
+    var(--rim-angle),
+    transparent 12%,
+    color-mix(in srgb, var(--accent) 42%, #fff) 47%,
+    rgba(255, 255, 255, 0.76) 52%,
+    transparent 78%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   transition: opacity 260ms ease;
 }
 .motion-depth.is-depth-active {
-  box-shadow: 0 26px 64px rgba(31, 43, 68, .11), 0 6px 18px rgba(31, 43, 68, .055);
+  box-shadow:
+    0 26px 64px rgba(31, 43, 68, 0.11),
+    0 6px 18px rgba(31, 43, 68, 0.055);
 }
-.motion-depth.is-depth-active > .motion-depth__light { opacity: .92; }
-.motion-depth.is-depth-active > .motion-depth__rim { opacity: .88; }
-[data-depth-layer] { transition: translate 520ms cubic-bezier(.16,1,.3,1); }
-.motion-depth.is-depth-active [data-depth-layer] { transition-duration: 90ms; }
+.motion-depth.is-depth-active > .motion-depth__light {
+  opacity: 0.92;
+}
+.motion-depth.is-depth-active > .motion-depth__rim {
+  opacity: 0.88;
+}
+[data-depth-layer] {
+  transition: translate 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.motion-depth.is-depth-active [data-depth-layer] {
+  transition-duration: 90ms;
+}
 
-.motion-field { overflow: clip; }
+.motion-field {
+  overflow: clip;
+}
 .motion-field__light {
   width: 620px;
   height: 620px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 18%, transparent) 0%, color-mix(in srgb, var(--brand-support) 7%, transparent) 30%, transparent 68%);
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 18%, transparent) 0%,
+    color-mix(in srgb, var(--brand-support) 7%, transparent) 30%,
+    transparent 68%
+  );
   transform: translate3d(-680px, -680px, 0);
   opacity: 0;
-  transition: opacity 420ms cubic-bezier(.16,1,.3,1);
+  transition: opacity 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .motion-field__mesh {
   position: absolute;
@@ -310,54 +444,94 @@ html.command-palette-open body {
   width: min(680px, 68vw);
   aspect-ratio: 1.35;
   pointer-events: none;
-  opacity: .28;
+  opacity: 0.28;
   border-radius: 50%;
   background:
     radial-gradient(circle at 28% 32%, color-mix(in srgb, var(--accent) 17%, transparent), transparent 30%),
     radial-gradient(circle at 72% 58%, color-mix(in srgb, var(--brand-support) 12%, transparent), transparent 34%),
-    radial-gradient(circle at 48% 76%, rgba(255,255,255,.48), transparent 25%);
-  transition: opacity 420ms ease, translate 120ms linear;
+    radial-gradient(circle at 48% 76%, rgba(255, 255, 255, 0.48), transparent 25%);
+  transition:
+    opacity 420ms ease,
+    translate 120ms linear;
 }
-.motion-field.is-field-active > .motion-field__light { opacity: 1; }
-.motion-field.is-field-active > .motion-field__mesh { opacity: .56; }
-[data-motion-layer] { transition: translate 580ms cubic-bezier(.16,1,.3,1); }
-.motion-field.is-field-active [data-motion-layer] { transition-duration: 95ms; }
+.motion-field.is-field-active > .motion-field__light {
+  opacity: 1;
+}
+.motion-field.is-field-active > .motion-field__mesh {
+  opacity: 0.56;
+}
+[data-motion-layer] {
+  transition: translate 580ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.motion-field.is-field-active [data-motion-layer] {
+  transition-duration: 95ms;
+}
 
 .motion-magnetic.is-magnetic {
-  box-shadow: var(--app-shadow-button), 0 10px 28px color-mix(in srgb, var(--accent) 17%, transparent);
+  box-shadow:
+    var(--app-shadow-button),
+    0 10px 28px color-mix(in srgb, var(--accent) 17%, transparent);
 }
-.motion-burst { position: relative; overflow: visible; isolation: isolate; }
-.motion-burst__spark {
-  position: absolute;
-  z-index: 20;
-  width: 7px;
-  height: 7px;
-  pointer-events: none;
-  background: color-mix(in srgb, var(--accent) 84%, #fff);
-  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
-}
-
 /* More spatial command palette: the only backdrop blur in the site, and only while open. */
-html.command-palette-open body > #app > :not(.command-overlay) { transition: transform 260ms cubic-bezier(.16,1,.3,1); }
+html.command-palette-open body > #app > :not(.command-overlay) {
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
 @supports (backdrop-filter: blur(1px)) {
-  .command-backdrop { backdrop-filter: blur(7px) saturate(.82); }
+  .command-backdrop {
+    backdrop-filter: blur(7px) saturate(0.82);
+  }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .command-panel { animation: command-panel-signature-in 420ms cubic-bezier(.16,1,.3,1); }
-  .command-card, .command-result { animation: command-item-in 460ms cubic-bezier(.16,1,.3,1) both; }
-  .command-card:nth-child(2), .command-result:nth-child(2) { animation-delay: 34ms; }
-  .command-card:nth-child(3), .command-result:nth-child(3) { animation-delay: 68ms; }
-  .command-card:nth-child(4), .command-result:nth-child(4) { animation-delay: 102ms; }
-  .command-card:nth-child(5), .command-result:nth-child(5) { animation-delay: 136ms; }
+  .command-panel {
+    animation: command-panel-signature-in 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .command-card,
+  .command-result {
+    animation: command-item-in 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .command-card:nth-child(2),
+  .command-result:nth-child(2) {
+    animation-delay: 34ms;
+  }
+  .command-card:nth-child(3),
+  .command-result:nth-child(3) {
+    animation-delay: 68ms;
+  }
+  .command-card:nth-child(4),
+  .command-result:nth-child(4) {
+    animation-delay: 102ms;
+  }
+  .command-card:nth-child(5),
+  .command-result:nth-child(5) {
+    animation-delay: 136ms;
+  }
 }
 @keyframes command-panel-signature-in {
-  0% { opacity: 0; translate: -50% 34px; scale: .93; }
-  58% { opacity: 1; translate: -50% -4px; scale: 1.012; }
-  100% { opacity: 1; translate: -50% 0; scale: 1; }
+  0% {
+    opacity: 0;
+    translate: -50% 34px;
+    scale: 0.93;
+  }
+  58% {
+    opacity: 1;
+    translate: -50% -4px;
+    scale: 1.012;
+  }
+  100% {
+    opacity: 1;
+    translate: -50% 0;
+    scale: 1;
+  }
 }
 @keyframes command-item-in {
-  from { opacity: 0; transform: translateY(11px) scale(.985); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(11px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (hover: none), (pointer: coarse) {
@@ -365,116 +539,25 @@ html.command-palette-open body > #app > :not(.command-overlay) { transition: tra
   .motion-depth__light,
   .motion-depth__rim,
   .motion-field__light,
-  .motion-field__mesh { display: none; }
-  .motion-depth { transform: none !important; }
+  .motion-field__mesh {
+    display: none;
+  }
+  .motion-depth {
+    transform: none !important;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   [data-spotlight] > .spotlight-aura,
   .motion-depth__rim,
-  .motion-field__mesh,
-  .motion-burst__spark { display: none !important; }
+  .motion-field__mesh {
+    display: none !important;
+  }
 }
 
 /* ============================================================
    v3.0 · Interaction identity
-   Visible click feedback, contextual cursor, entry scans and richer refraction.
+   Contextual cursor, entry scans and richer refraction.
    ============================================================ */
-.motion-burst {
-  -webkit-tap-highlight-color: transparent;
-}
-.motion-burst.is-signature-pressed {
-  animation: motion-press-return 420ms cubic-bezier(.16, 1, .3, 1);
-}
-@keyframes motion-press-return {
-  0% { filter: brightness(1); }
-  20% { filter: brightness(.985); }
-  52% { filter: brightness(1.035); }
-  100% { filter: brightness(1); }
-}
-
-.motion-clickfx {
-  position: fixed;
-  z-index: 2147483000;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-  contain: layout style;
-  animation: motion-clickfx-life 720ms linear both;
-}
-.motion-clickfx > i {
-  position: absolute;
-  left: 0;
-  top: 0;
-  display: block;
-  pointer-events: none;
-}
-.motion-clickfx__flash {
-  width: 44px;
-  height: 44px;
-  margin: -22px 0 0 -22px;
-  border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 30%, #fff) 0%, color-mix(in srgb, var(--accent) 10%, transparent) 42%, transparent 72%);
-  animation: motion-click-flash 520ms cubic-bezier(.16, 1, .3, 1) both;
-}
-.motion-clickfx__ring {
-  width: 24px;
-  height: 24px;
-  margin: -12px 0 0 -12px;
-  border: 1.5px solid color-mix(in srgb, var(--accent) 70%, #fff);
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px color-mix(in srgb, #fff 60%, transparent) inset;
-  animation: motion-click-ring 620ms cubic-bezier(.16, 1, .3, 1) both;
-}
-.motion-clickfx__core {
-  width: 18px;
-  height: 18px;
-  margin: -9px 0 0 -9px;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 88%, #fff), color-mix(in srgb, var(--brand-support) 58%, #fff));
-  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
-  filter: drop-shadow(0 4px 9px color-mix(in srgb, var(--accent) 24%, transparent));
-  animation: motion-click-core 560ms cubic-bezier(.16, 1, .3, 1) both;
-}
-.motion-clickfx__spark {
-  --dx: 0px;
-  --dy: 0px;
-  --mx: 0px;
-  --my: 0px;
-  --spin: 25deg;
-  --mspin: 12deg;
-  --delay: 0ms;
-  width: 7px;
-  height: 7px;
-  margin: -3.5px 0 0 -3.5px;
-  background: color-mix(in srgb, var(--accent) 78%, #fff);
-  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
-  opacity: 0;
-  animation: motion-click-spark 620ms var(--delay) cubic-bezier(.16, 1, .3, 1) both;
-}
-.motion-clickfx--soft .motion-clickfx__ring { border-color: color-mix(in srgb, var(--app-text-soft) 50%, #fff); }
-.motion-clickfx--soft .motion-clickfx__core,
-.motion-clickfx--soft .motion-clickfx__spark { background: color-mix(in srgb, var(--app-text-soft) 68%, #fff); }
-@keyframes motion-clickfx-life { from { opacity: 1; } to { opacity: 1; } }
-@keyframes motion-click-flash {
-  0% { opacity: 0; transform: scale(.18); }
-  24% { opacity: .72; }
-  100% { opacity: 0; transform: scale(2.55); }
-}
-@keyframes motion-click-ring {
-  0% { opacity: 0; transform: scale(.35); }
-  18% { opacity: .92; }
-  100% { opacity: 0; transform: scale(3.35); }
-}
-@keyframes motion-click-core {
-  0% { opacity: 0; transform: rotate(-28deg) scale(.22); }
-  28% { opacity: 1; transform: rotate(8deg) scale(1.22); }
-  100% { opacity: 0; transform: rotate(48deg) scale(.46); }
-}
-@keyframes motion-click-spark {
-  0% { opacity: 0; transform: translate3d(0,0,0) rotate(0deg) scale(.2); }
-  28% { opacity: .92; transform: translate3d(var(--mx), var(--my), 0) rotate(var(--mspin)) scale(1); }
-  100% { opacity: 0; transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--spin)) scale(.28); }
-}
-
 .motion-cursor-badge {
   position: fixed;
   z-index: 2147482000;
@@ -489,16 +572,24 @@ html.command-palette-open body > #app > :not(.command-overlay) { transition: tra
   border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--app-border));
   border-radius: 999px;
   background: color-mix(in srgb, var(--app-surface) 90%, transparent);
-  box-shadow: 0 10px 28px rgba(31, 43, 68, .12), inset 0 1px 0 rgba(255,255,255,.78);
+  box-shadow:
+    0 10px 28px rgba(31, 43, 68, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
   color: var(--app-text-muted);
   opacity: 0;
   pointer-events: none;
-  transform: translate3d(-120px,-120px,0) scale(.82);
+  transform: translate3d(-120px, -120px, 0) scale(0.82);
   transform-origin: 0 0;
-  transition: opacity 150ms ease, scale 220ms cubic-bezier(.16,1,.3,1), transform 85ms linear;
+  transition:
+    opacity 150ms ease,
+    scale 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 85ms linear;
   backdrop-filter: blur(7px);
 }
-.motion-cursor-badge.is-visible { opacity: .96; scale: 1; }
+.motion-cursor-badge.is-visible {
+  opacity: 0.96;
+  scale: 1;
+}
 .motion-cursor-badge i {
   width: 9px;
   height: 9px;
@@ -510,7 +601,7 @@ html.command-palette-open body > #app > :not(.command-overlay) { transition: tra
   font-family: var(--font-mono);
   font-size: 8px;
   font-weight: 760;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
 }
 
 /* One glint per pointer entry gives depth surfaces a stronger material response. */
@@ -523,48 +614,35 @@ html.command-palette-open body > #app > :not(.command-overlay) { transition: tra
   width: 18%;
   opacity: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.68), transparent);
-  transform: skewX(-17deg) translate3d(-180%,0,0);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.68), transparent);
+  transform: skewX(-17deg) translate3d(-180%, 0, 0);
   mix-blend-mode: soft-light;
 }
 .motion-depth.is-depth-active > .motion-depth__sheen {
-  animation: motion-depth-glint 680ms cubic-bezier(.16,1,.3,1) both;
+  animation: motion-depth-glint 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @keyframes motion-depth-glint {
-  0% { opacity: 0; transform: skewX(-17deg) translate3d(-180%,0,0); }
-  22% { opacity: .42; }
-  100% { opacity: 0; transform: skewX(-17deg) translate3d(980%,0,0); }
+  0% {
+    opacity: 0;
+    transform: skewX(-17deg) translate3d(-180%, 0, 0);
+  }
+  22% {
+    opacity: 0.42;
+  }
+  100% {
+    opacity: 0;
+    transform: skewX(-17deg) translate3d(980%, 0, 0);
+  }
 }
 
 @media (hover: none), (pointer: coarse) {
-  .motion-cursor-badge { display: none !important; }
+  .motion-cursor-badge {
+    display: none !important;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .motion-clickfx,
   .motion-cursor-badge,
-  .motion-depth__sheen { display: none !important; }
-  .motion-burst.is-signature-pressed { animation: none !important; }
-}
-
-/* Short route-exit choreography; only v-burst same-origin links opt in. */
-html.motion-route-leaving #app {
-  opacity: .74;
-  transform: translate3d(0, -2px, 0) scale(.994);
-  filter: saturate(.86) blur(.45px);
-  transition: opacity 175ms ease, transform 175ms cubic-bezier(.4,0,1,1), filter 175ms ease;
-}
-html.motion-route-leaving::after {
-  content: "";
-  position: fixed;
-  z-index: 2147482500;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(110deg, transparent 36%, color-mix(in srgb, var(--accent) 7%, #fff) 50%, transparent 64%);
-  transform: translate3d(-110%,0,0);
-  animation: motion-route-sweep 220ms ease-out both;
-}
-@keyframes motion-route-sweep { to { transform: translate3d(110%,0,0); } }
-@media (prefers-reduced-motion: reduce) {
-  html.motion-route-leaving #app { opacity: 1; transform: none; filter: none; transition: none; }
-  html.motion-route-leaving::after { display: none; }
+  .motion-depth__sheen {
+    display: none !important;
+  }
 }

@@ -43,22 +43,26 @@ const next = ref(null);
  * 获取上一篇和下一篇文章
  * @param {Object} article 当前文章对象
  */
-watch([() => props.id, () => props.category], async () => {
-  prev.value = null;
-  next.value = null;
+watch(
+  [() => props.id, () => props.category],
+  async () => {
+    prev.value = null;
+    next.value = null;
 
-  if (props.category === "" || props.id === "") return;
+    if (props.category === "" || props.id === "") return;
 
-  const res = await getArticlesByCategory(props.category);
-  const currentIndex = res.findIndex((item) => item.id === props.id);
-  if (currentIndex === -1) return;
+    const res = await getArticlesByCategory(props.category);
+    const currentIndex = res.findIndex((item) => item.id === props.id);
+    if (currentIndex === -1) return;
 
-  const prevArticle = currentIndex > 0 ? res[currentIndex - 1] : null;
-  const nextArticle = currentIndex < res.length - 1 ? res[currentIndex + 1] : null;
+    const prevArticle = currentIndex > 0 ? res[currentIndex - 1] : null;
+    const nextArticle = currentIndex < res.length - 1 ? res[currentIndex + 1] : null;
 
-  if (prevArticle) prev.value = { title: prevArticle.title, url: `/article/${prevArticle.id}` };
-  if (nextArticle) next.value = { title: nextArticle.title, url: `/article/${nextArticle.id}` };
-}, { immediate: true });
+    if (prevArticle) prev.value = { title: prevArticle.title, url: `/article/${prevArticle.id}` };
+    if (nextArticle) next.value = { title: nextArticle.title, url: `/article/${nextArticle.id}` };
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>
@@ -68,7 +72,9 @@ watch([() => props.id, () => props.category], async () => {
   gap: 10px;
   margin-top: 4px;
 }
-.prev-next-item { min-width: 0; }
+.prev-next-item {
+  min-width: 0;
+}
 .nav-link {
   position: relative;
   min-height: 118px;
@@ -83,7 +89,10 @@ watch([() => props.id, () => props.category], async () => {
   color: var(--app-text);
   text-decoration: none;
   box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 60%, transparent);
-  transition: transform 240ms cubic-bezier(.16,1,.3,1), border-color 180ms ease, background-color 180ms ease;
+  transition:
+    transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 180ms ease,
+    background-color 180ms ease;
 }
 .nav-link::after {
   content: "";
@@ -99,7 +108,7 @@ watch([() => props.id, () => props.category], async () => {
   font-family: var(--font-mono);
   font-size: 8.5px;
   font-weight: 720;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
 }
 .nav-link strong {
   max-width: 26ch;
@@ -115,21 +124,42 @@ watch([() => props.id, () => props.category], async () => {
   bottom: 17px;
   color: var(--accent);
   font-size: 16px;
-  transition: transform 220ms cubic-bezier(.16,1,.3,1);
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-.next { text-align: left; }
+.next {
+  text-align: left;
+}
 .nav-link:hover {
   border-color: var(--accent-line);
   background: color-mix(in srgb, var(--app-surface) 90%, var(--accent) 1.5%);
   transform: translateY(-2px);
 }
-.nav-link:hover::after { opacity: 1; }
-.prev:hover .nav-arrow { transform: translateX(-3px); }
-.next:hover .nav-arrow { transform: translateX(3px); }
+.nav-link:hover::after {
+  opacity: 1;
+}
+.prev:hover .nav-arrow {
+  transform: translateX(-3px);
+}
+.next:hover .nav-arrow {
+  transform: translateX(3px);
+}
 @media (max-width: 640px) {
-  .prev-next-nav { grid-template-columns: 1fr; gap: 8px; }
-  .nav-link { min-height: 96px; padding: 15px 16px; border-radius: 15px; }
-  .nav-link strong { max-width: calc(100% - 34px); font-size: 13px; }
-  .nav-arrow { right: 15px; bottom: 14px; }
+  .prev-next-nav {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .nav-link {
+    min-height: 96px;
+    padding: 15px 16px;
+    border-radius: 15px;
+  }
+  .nav-link strong {
+    max-width: calc(100% - 34px);
+    font-size: 13px;
+  }
+  .nav-arrow {
+    right: 15px;
+    bottom: 14px;
+  }
 }
 </style>

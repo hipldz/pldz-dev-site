@@ -17,7 +17,11 @@ function cleanupElement(element) {
   const cleanups = cleanupMap.get(element) || [];
   cleanupMap.delete(element);
   cleanups.forEach((cleanup) => {
-    try { cleanup(); } catch (error) { console.warn("motion cleanup failed", error); }
+    try {
+      cleanup();
+    } catch (error) {
+      console.warn("motion cleanup failed", error);
+    }
   });
 }
 
@@ -63,10 +67,13 @@ function animateRevealItem(item, index = 0) {
       { opacity: 0.78, transform: "translate3d(0, 4px, 0) scale(.998)", offset: 0.72 },
       { opacity: 1, transform: "translate3d(0, 0, 0) scale(1)" },
     ],
-    { duration: 660, delay, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "both" }
+    { duration: 660, delay, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "both" },
   );
   running.add(animation);
-  animation.finished.then(() => running.delete(animation), () => running.delete(animation));
+  animation.finished.then(
+    () => running.delete(animation),
+    () => running.delete(animation),
+  );
 }
 
 export function enterContent(element) {
@@ -76,7 +83,7 @@ export function enterContent(element) {
       { opacity: 0.35, transform: "translate3d(0, 18px, 0) scale(.992)" },
       { opacity: 1, transform: "translate3d(0, 0, 0) scale(1)" },
     ],
-    { duration: 560, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }
+    { duration: 560, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
   );
   trackAnimation(element, animation);
 }
@@ -89,10 +96,13 @@ function animateRevealMedia(item, index = 0) {
       { opacity: 0.12, clipPath: "inset(12% 2% 10% 2% round 22px)", transform: "translate3d(0, 18px, 0) scale(1.045)" },
       { opacity: 1, clipPath: "inset(0% 0% 0% 0% round 0px)", transform: "translate3d(0, 0, 0) scale(1)" },
     ],
-    { duration: 760, delay, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "both" }
+    { duration: 760, delay, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "both" },
   );
   running.add(animation);
-  animation.finished.then(() => running.delete(animation), () => running.delete(animation));
+  animation.finished.then(
+    () => running.delete(animation),
+    () => running.delete(animation),
+  );
 }
 
 function revealElement(element) {
@@ -107,22 +117,34 @@ function revealElement(element) {
   media.slice(0, 8).forEach((item, index) => animateRevealMedia(item, index));
 }
 
-const revealObserver = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver((entries) => {
-  for (const entry of entries) {
-    if (!entry.isIntersecting) continue;
-    revealObserver.unobserve(entry.target);
-    revealElement(entry.target);
-  }
-}, { threshold: 0.08 });
+const revealObserver =
+  typeof IntersectionObserver === "undefined"
+    ? null
+    : new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            revealObserver.unobserve(entry.target);
+            revealElement(entry.target);
+          }
+        },
+        { threshold: 0.08 },
+      );
 
-const spotlightObserver = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver((entries) => {
-  for (const entry of entries) {
-    entry.target.classList.toggle("is-spotlight", entry.isIntersecting);
-  }
-}, {
-  rootMargin: "-16% 0px -64% 0px",
-  threshold: 0,
-});
+const spotlightObserver =
+  typeof IntersectionObserver === "undefined"
+    ? null
+    : new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            entry.target.classList.toggle("is-spotlight", entry.isIntersecting);
+          }
+        },
+        {
+          rootMargin: "-16% 0px -64% 0px",
+          threshold: 0,
+        },
+      );
 
 export const reveal = {
   mounted(element) {
@@ -269,7 +291,7 @@ export const depth = {
       const ny = localY / Math.max(rect.height, 1) - 0.5;
       const tiltY = nx * amount * 3.2;
       const tiltX = -ny * amount * 2.5;
-      const angle = Math.atan2(localY - rect.height / 2, localX - rect.width / 2) * 180 / Math.PI + 90;
+      const angle = (Math.atan2(localY - rect.height / 2, localX - rect.width / 2) * 180) / Math.PI + 90;
       light.style.transform = `translate3d(${(localX - 190).toFixed(1)}px, ${(localY - 190).toFixed(1)}px, 0)`;
       rim.style.setProperty("--rim-angle", `${angle.toFixed(1)}deg`);
       element.style.transform = `perspective(1100px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translate3d(0,-5px,0)`;
@@ -364,123 +386,6 @@ export const field = {
   },
 };
 
-// Visible click identity. The previous local spark was often clipped by card overflow
-// or disappeared during navigation. v3.0 paints the feedback in a fixed body-level
-// layer and briefly delays same-origin navigation so the interaction is perceptible.
-function createClickFx(clientX, clientY, tone = "accent") {
-  if (reducedMotion.matches || !document.body) return;
-  const root = document.createElement("span");
-  root.className = `motion-clickfx motion-clickfx--${tone}`;
-  root.style.left = `${Math.round(clientX)}px`;
-  root.style.top = `${Math.round(clientY)}px`;
-  root.setAttribute("aria-hidden", "true");
-
-  const flash = document.createElement("i");
-  flash.className = "motion-clickfx__flash";
-  const ring = document.createElement("i");
-  ring.className = "motion-clickfx__ring";
-  const core = document.createElement("i");
-  core.className = "motion-clickfx__core";
-  root.append(flash, ring, core);
-
-  const vectors = [
-    [-34, -22], [2, -40], [35, -19], [40, 11],
-    [15, 36], [-22, 31], [-39, 5], [-25, -8],
-  ];
-  vectors.forEach(([dx, dy], index) => {
-    const spark = document.createElement("i");
-    spark.className = "motion-clickfx__spark";
-    spark.style.setProperty("--dx", `${dx}px`);
-    spark.style.setProperty("--dy", `${dy}px`);
-    spark.style.setProperty("--mx", `${(dx * 0.42).toFixed(2)}px`);
-    spark.style.setProperty("--my", `${(dy * 0.42).toFixed(2)}px`);
-    spark.style.setProperty("--spin", `${16 + index * 21}deg`);
-    spark.style.setProperty("--mspin", `${((16 + index * 21) * 0.48).toFixed(2)}deg`);
-    spark.style.setProperty("--delay", `${index * 10}ms`);
-    root.appendChild(spark);
-  });
-
-  document.body.appendChild(root);
-  const cleanup = () => root.remove();
-  const onEnd = (event) => {
-    if (event.target === root) cleanup();
-  };
-  root.addEventListener("animationend", onEnd, { once: true });
-  window.setTimeout(cleanup, 820);
-}
-
-function isPlainPrimaryClick(event) {
-  return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
-}
-
-function getDelayedNavigation(element, event) {
-  if (!(element instanceof HTMLAnchorElement) || !isPlainPrimaryClick(event)) return null;
-  if (element.target && element.target !== "_self") return null;
-  if (element.hasAttribute("download")) return null;
-  let target;
-  try { target = new URL(element.href, window.location.href); } catch { return null; }
-  if (target.origin !== window.location.origin) return null;
-  const current = new URL(window.location.href);
-  const sameDocument = target.pathname === current.pathname && target.search === current.search && target.hash !== current.hash;
-  return { href: target.href, sameDocument };
-}
-
-export const burst = {
-  mounted(element, binding) {
-    if (reducedMotion.matches) return;
-    element.classList.add("motion-burst");
-    let lastPointerAt = 0;
-    let lastPoint = null;
-
-    const fire = (clientX, clientY) => {
-      const rect = element.getBoundingClientRect();
-      const x = Number.isFinite(clientX) && clientX > 0 ? clientX : rect.left + rect.width / 2;
-      const y = Number.isFinite(clientY) && clientY > 0 ? clientY : rect.top + rect.height / 2;
-      createClickFx(x, y, binding.value === "soft" ? "soft" : "accent");
-      element.classList.remove("is-signature-pressed");
-      void element.offsetWidth;
-      element.classList.add("is-signature-pressed");
-      window.setTimeout(() => element.classList.remove("is-signature-pressed"), 420);
-    };
-
-    const onPointerDown = (event) => {
-      lastPointerAt = performance.now();
-      lastPoint = { x: event.clientX, y: event.clientY };
-      fire(event.clientX, event.clientY);
-    };
-
-    const onClick = (event) => {
-      // Keyboard activation has no pointerdown; still give it centered feedback.
-      if (performance.now() - lastPointerAt > 220) fire(lastPoint?.x, lastPoint?.y);
-      const navigation = getDelayedNavigation(element, event);
-      if (!navigation || element.dataset.burstNavigating === "1") return;
-      event.preventDefault();
-      element.dataset.burstNavigating = "1";
-      if (!navigation.sameDocument) document.documentElement.classList.add("motion-route-leaving");
-      window.setTimeout(() => {
-        if (navigation.sameDocument) {
-          window.location.hash = new URL(navigation.href).hash;
-          element.dataset.burstNavigating = "0";
-          return;
-        }
-        window.location.assign(navigation.href);
-      }, navigation.sameDocument ? 120 : 175);
-    };
-
-    element.addEventListener("pointerdown", onPointerDown);
-    element.addEventListener("click", onClick);
-    addCleanup(element, () => {
-      element.removeEventListener("pointerdown", onPointerDown);
-      element.removeEventListener("click", onClick);
-      element.classList.remove("motion-burst", "is-signature-pressed");
-      delete element.dataset.burstNavigating;
-    });
-  },
-  beforeUnmount(element) {
-    cleanupElement(element);
-  },
-};
-
 // A small contextual cursor badge for high-value media and navigation surfaces.
 // It supplements the native cursor instead of replacing it, and is disabled on touch.
 let cursorBadge = null;
@@ -490,7 +395,7 @@ function ensureCursorBadge() {
   const badge = document.createElement("span");
   badge.className = "motion-cursor-badge";
   badge.setAttribute("aria-hidden", "true");
-  badge.innerHTML = '<i></i><b></b>';
+  badge.innerHTML = "<i></i><b></b>";
   document.body.appendChild(badge);
   cursorBadge = badge;
   return badge;
@@ -504,7 +409,9 @@ function hideCursorBadge(owner) {
 export const cursor = {
   mounted(element, binding) {
     if (!canUsePointerMotion()) return;
-    const label = String(binding.value || "OPEN").slice(0, 14).toUpperCase();
+    const label = String(binding.value || "OPEN")
+      .slice(0, 14)
+      .toUpperCase();
     const runner = makeFrameRunner(({ x, y }) => {
       const badge = ensureCursorBadge();
       badge.style.transform = `translate3d(${(x + 18).toFixed(1)}px, ${(y + 16).toFixed(1)}px, 0)`;
@@ -517,7 +424,10 @@ export const cursor = {
       runner({ x: event.clientX, y: event.clientY });
     };
     const onMove = (event) => runner({ x: event.clientX, y: event.clientY });
-    const onLeave = () => { runner.cancel(); hideCursorBadge(element); };
+    const onLeave = () => {
+      runner.cancel();
+      hideCursorBadge(element);
+    };
     element.addEventListener("pointerenter", onEnter, { passive: true });
     element.addEventListener("pointermove", onMove, { passive: true });
     element.addEventListener("pointerleave", onLeave, { passive: true });

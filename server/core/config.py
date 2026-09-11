@@ -3,6 +3,7 @@ import dotenv
 
 from .settings import Settings
 
+
 class ProjectConfig:
     '''
     整个项目的配置文件

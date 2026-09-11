@@ -51,7 +51,7 @@ export const apiPost = (path, body, isBlob = false) =>
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     },
-    isBlob
+    isBlob,
   );
 
 export const apiPrefix = "/api/v1";

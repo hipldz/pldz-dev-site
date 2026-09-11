@@ -346,7 +346,7 @@ watch(
     if (Array.isArray(data)) {
       comments.value = data;
     }
-  }
+  },
 );
 </script>
 
@@ -459,7 +459,9 @@ textarea:disabled {
   border: none;
   border-radius: var(--app-radius-sm);
   cursor: pointer;
-  transition: background var(--app-motion-duration) var(--app-ease), transform var(--app-motion-duration) var(--app-ease);
+  transition:
+    background var(--app-motion-duration) var(--app-ease),
+    transform var(--app-motion-duration) var(--app-ease);
   min-width: 80px;
 }
 
@@ -503,7 +505,10 @@ textarea:disabled {
   background: var(--app-surface);
   border-radius: var(--app-radius-sm);
   cursor: pointer;
-  transition: background var(--app-motion-duration) var(--app-ease), color var(--app-motion-duration) var(--app-ease), border-color var(--app-motion-duration) var(--app-ease);
+  transition:
+    background var(--app-motion-duration) var(--app-ease),
+    color var(--app-motion-duration) var(--app-ease),
+    border-color var(--app-motion-duration) var(--app-ease);
 }
 
 .sort-options button.active {
@@ -596,7 +601,9 @@ textarea:disabled {
   border: none;
   border-radius: var(--app-radius-sm);
   cursor: pointer;
-  transition: background var(--app-motion-duration) var(--app-ease), color var(--app-motion-duration) var(--app-ease);
+  transition:
+    background var(--app-motion-duration) var(--app-ease),
+    color var(--app-motion-duration) var(--app-ease);
 }
 
 .action-btn:hover {
@@ -656,6 +663,8 @@ textarea:disabled {
 }
 
 @media (max-width: 768px) {
-  textarea { font-size: 16px; }
+  textarea {
+    font-size: 16px;
+  }
 }
 </style>

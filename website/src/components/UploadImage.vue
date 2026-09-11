@@ -79,7 +79,7 @@ watch(
       imageUploadError.value = "图像名称不能为空！";
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 /**

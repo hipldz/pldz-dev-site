@@ -49,7 +49,14 @@
                 <code>{{ setupData.secret }}</code>
               </div>
               <div class="security-form-row">
-                <input class="field-input" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="输入应用中的 6 位验证码" v-model="setupCode" />
+                <input
+                  class="field-input"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  placeholder="输入应用中的 6 位验证码"
+                  v-model="setupCode"
+                />
                 <button class="btn btn-primary" :disabled="isBusy" @click="onConfirmTwoFactor">确认开启</button>
               </div>
               <button class="btn btn-outline" :disabled="isBusy" @click="onCancelSetup">取消绑定</button>

@@ -5,19 +5,6 @@
 
   <transition name="mobile-drawer-slide">
     <aside v-show="modelValue" class="mobile-drawer">
-      <header class="mobile-drawer__header">
-        <div class="mobile-drawer__brand">
-          <span class="mobile-drawer__logo"></span>
-          <div>
-            <div class="mobile-drawer__title">{{ title }}</div>
-            <div v-if="subtitle" class="mobile-drawer__subtitle">{{ subtitle }}</div>
-          </div>
-        </div>
-        <button class="mobile-drawer__close" type="button" aria-label="关闭导航" @click="onClose">
-          <span class="material-symbols-rounded" aria-hidden="true">close</span>
-        </button>
-      </header>
-
       <div class="mobile-drawer__body">
         <div v-if="showNavPlaceholder" class="nav-placeholder"></div>
         <div v-if="$slots.default" class="mobile-drawer__extra">
@@ -236,7 +223,6 @@ onBeforeUnmount(() => {
     top: 60px !important;
     z-index: 10002 !important;
     width: min(88vw, 340px) !important;
-    border-radius: 0 22px 0 0;
   }
   .mobile-drawer__header {
     padding: 18px 16px 14px;
