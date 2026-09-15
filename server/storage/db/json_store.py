@@ -1,8 +1,10 @@
 import os
 import json
 import copy
+import errno
 import tempfile
 import threading
+import time
 from pathlib import Path
 
 from core import ProjectConfig
@@ -11,6 +13,11 @@ try:
     import fcntl
 except ImportError:  # pragma: no cover - Windows development fallback
     fcntl = None
+
+try:
+    import msvcrt
+except ImportError:  # pragma: no cover - POSIX development fallback
+    msvcrt = None
 
 
 class JsonProcessLock:
@@ -24,12 +31,40 @@ class JsonProcessLock:
         self._thread_lock.acquire()
         try:
             depth = getattr(self._local, "depth", 0)
-            if depth == 0 and fcntl is not None:
+            if depth == 0 and (fcntl is not None or msvcrt is not None):
                 lock_path = Path(ProjectConfig.get_db_path()) / ".json-store.lock"
                 lock_path.parent.mkdir(parents=True, exist_ok=True)
                 lock_file = lock_path.open("a+")
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
-                self._local.lock_file = lock_file
+                try:
+                    if fcntl is not None:
+                        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                        self._local.lock_backend = "fcntl"
+                    else:
+                        # msvcrt locks a byte range, so ensure byte zero exists.
+                        lock_file.seek(0, os.SEEK_END)
+                        if lock_file.tell() == 0:
+                            lock_file.write("\0")
+                            lock_file.flush()
+                        lock_file.seek(0)
+                        while True:
+                            try:
+                                msvcrt.locking(
+                                    lock_file.fileno(), msvcrt.LK_NBLCK, 1
+                                )
+                                break
+                            except OSError as error:
+                                if error.errno not in (
+                                    errno.EACCES,
+                                    errno.EAGAIN,
+                                    errno.EDEADLK,
+                                ):
+                                    raise
+                                time.sleep(0.05)
+                        self._local.lock_backend = "msvcrt"
+                    self._local.lock_file = lock_file
+                except Exception:
+                    lock_file.close()
+                    raise
             self._local.depth = depth + 1
             return self
         except Exception:
@@ -39,13 +74,26 @@ class JsonProcessLock:
     def __exit__(self, exc_type, exc_value, traceback):
         depth = self._local.depth - 1
         self._local.depth = depth
-        if depth == 0:
-            lock_file = getattr(self._local, "lock_file", None)
-            if lock_file is not None:
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
-                lock_file.close()
-                del self._local.lock_file
-        self._thread_lock.release()
+        try:
+            if depth == 0:
+                lock_file = getattr(self._local, "lock_file", None)
+                if lock_file is not None:
+                    try:
+                        if self._local.lock_backend == "fcntl":
+                            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                        else:
+                            lock_file.seek(0)
+                            msvcrt.locking(
+                                lock_file.fileno(), msvcrt.LK_UNLCK, 1
+                            )
+                    finally:
+                        try:
+                            lock_file.close()
+                        finally:
+                            del self._local.lock_file
+                            del self._local.lock_backend
+        finally:
+            self._thread_lock.release()
 
 
 _lock = JsonProcessLock()
@@ -83,12 +131,14 @@ def _write_json(filepath: str, data) -> None:
             file_obj.flush()
             os.fsync(file_obj.fileno())
         os.replace(temp_path, target)
-        # Persist the directory entry as well as the file contents on POSIX.
-        directory_fd = os.open(target.parent, os.O_RDONLY)
-        try:
-            os.fsync(directory_fd)
-        finally:
-            os.close(directory_fd)
+        # Windows does not allow opening directories with os.open this way.
+        # On POSIX, sync the directory entry as well as the file contents.
+        if os.name == 'posix':
+            directory_fd = os.open(target.parent, os.O_RDONLY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
     finally:
         if temp_path:
             temp_path.unlink(missing_ok=True)

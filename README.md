@@ -72,12 +72,10 @@
 .
 ├── data/                      # 内容、图片、资源配置、缓存、JSON 数据库、模板产物
 ├── nginx/                     # Nginx 主配置和站点配置
-├── server/                    # FastAPI 后端
+├── server/                    # FastAPI 后端、测试及 Python 依赖
 ├── website/                   # Vue 3 网站前端工程
 ├── Dockerfile                 # backend 镜像构建文件
 ├── docker-compose.yaml        # backend + nginx 编排
-├── requirements.txt           # Python 生产运行依赖
-├── requirements-dev.txt       # Python 本地开发/测试依赖
 ├── .env.example               # 环境变量示例
 └── README.md                  # 当前文档
 ```
@@ -126,15 +124,15 @@ docker compose up --build
 
 ```bash
 cp .env.example .env
-pip install -r requirements.txt
+pip install -r server/requirements.txt
 python server/main.py
 ```
 
 如需运行测试或使用开发工具，请安装开发依赖：
 
 ```bash
-pip install -r requirements-dev.txt
-pytest
+pip install -r server/requirements-dev.txt
+pytest -c server/pytest.ini
 ```
 
 默认后端监听：
@@ -1259,7 +1257,7 @@ Content-Type: application/json
 cp .env.example .env
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements-dev.txt
+pip install -r server/requirements-dev.txt
 python server/main.py
 ```
 
