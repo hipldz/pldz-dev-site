@@ -109,6 +109,7 @@ export function renderMarkdown(source = "") {
 
   const nextSlug = createSlugFactory();
   const headings = [];
+  const images = [];
 
   walkTokens(tokens, (token) => {
     if (token.type === "heading") {
@@ -118,6 +119,16 @@ export function renderMarkdown(source = "") {
         id,
         text: token.text,
         depth: token.depth,
+      });
+    }
+
+    if (token.type === "image") {
+      token.imageIndex = images.length;
+      const source = String(token.href || "");
+      images.push({
+        src: source,
+        originalSrc: toOriginalImageUrl(source),
+        alt: String(token.text || ""),
       });
     }
   });
@@ -144,7 +155,7 @@ export function renderMarkdown(source = "") {
     return `<a href="${safeHref}"${titleAttr}${targetAttr}>${innerHtml}</a>`;
   };
 
-  renderer.image = function ({ href, title, text }) {
+  renderer.image = function ({ href, title, text, imageIndex }) {
     const source = String(href || "");
     const originalSource = toOriginalImageUrl(source);
     const safeSource = escapeHtml(source);
@@ -153,7 +164,7 @@ export function renderMarkdown(source = "") {
     const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
     const ariaLabel = escapeHtml(text ? `查看原图：${text}` : "查看文章原图");
 
-    return `<a class="markdown-image-link" href="${safeOriginal}" data-original-src="${safeOriginal}" target="_blank" rel="noopener noreferrer" aria-label="${ariaLabel}"><img src="${safeSource}" alt="${safeAlt}" loading="lazy" decoding="async"${titleAttr}></a>`;
+    return `<a class="markdown-image-link" href="${safeOriginal}" data-original-src="${safeOriginal}" data-image-index="${Number.isInteger(imageIndex) ? imageIndex : 0}" target="_blank" rel="noopener noreferrer" aria-label="${ariaLabel}"><img src="${safeSource}" alt="${safeAlt}" loading="lazy" decoding="async"${titleAttr}></a>`;
   };
 
   renderer.code = function ({ text, lang }) {
@@ -179,5 +190,5 @@ export function renderMarkdown(source = "") {
     renderer,
   });
 
-  return { html, headings };
+  return { html, headings, images };
 }

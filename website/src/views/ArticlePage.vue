@@ -7,9 +7,9 @@
   <HeaderBar :scroll="true" @toggle-mobile-menu="toggleMobileMenu"></HeaderBar>
 
   <!-- 主体内容 -->
-  <div class="main-container article-layout" id="article-main-container">
+  <div :class="['main-container', 'article-layout', { 'is-catalog-hidden': !isCatalogVisible }]" id="article-main-container">
     <!-- 左侧边栏 -->
-    <aside class="sidebar sidebar-sticky">
+    <aside id="article-catalog" v-show="isCatalogVisible" class="sidebar sidebar-sticky">
       <div class="sidebar-item sidebar-card sidebar-article-chapter">
         <ChapterBlock :headings="headings"></ChapterBlock>
       </div>
@@ -53,6 +53,18 @@
 
   <div class="fab-container" aria-label="文章快捷操作">
     <div class="fab-actions">
+      <button
+        v-if="headings.length"
+        class="fab-item fab-scroll fab-catalog"
+        type="button"
+        :aria-expanded="isCatalogVisible"
+        aria-controls="article-catalog"
+        :title="isCatalogVisible ? '关闭文章目录' : '显示文章目录'"
+        :aria-label="isCatalogVisible ? '关闭文章目录' : '显示文章目录'"
+        @click="toggleCatalog"
+      >
+        <span class="fab-emoji" aria-hidden="true">✦</span><span class="fab-direction fab-catalog__icon" aria-hidden="true">☷</span>
+      </button>
       <button class="fab-item fab-scroll" type="button" @click="onToTop" id="to-top" title="回到顶部" aria-label="回到顶部">
         <span class="fab-emoji" aria-hidden="true">✦</span><span class="fab-direction" aria-hidden="true">↑</span>
       </button>
@@ -61,81 +73,52 @@
       </button>
       <button
         v-show="article.meta.csdn"
-        class="fab-item csdn-icon fab-brand"
+        class="fab-item fab-brand fab-external"
         type="button"
         id="to-csdn"
         @click="onGotoLink(article.meta.csdn)"
         title="CSDN"
         aria-label="打开 CSDN"
-      ></button>
+      >
+        <span class="fab-external__letter" aria-hidden="true">C</span>
+      </button>
       <button
         v-show="article.meta.juejin"
-        class="fab-item juejin-icon fab-brand"
+        class="fab-item fab-brand fab-external"
         type="button"
         id="to-juejin"
         @click="onGotoLink(article.meta.juejin)"
         title="掘金"
         aria-label="打开掘金"
-      ></button>
+      >
+        <span class="fab-external__letter" aria-hidden="true">J</span>
+      </button>
       <button
         v-show="article.meta.github"
-        class="fab-item github-icon fab-brand"
+        class="fab-item fab-brand fab-external"
         type="button"
         id="to-github"
         @click="onGotoLink(article.meta.github)"
         title="GitHub"
         aria-label="打开 GitHub"
-      ></button>
+      >
+        <span class="fab-external__letter" aria-hidden="true">G</span>
+      </button>
       <button
         v-show="article.meta.gitee"
-        class="fab-item gitee-icon fab-brand"
+        class="fab-item fab-brand fab-external"
         type="button"
         id="to-gitee"
         @click="onGotoLink(article.meta.gitee)"
         title="Gitee"
         aria-label="打开 Gitee"
-      ></button>
+      >
+        <span class="fab-external__letter" aria-hidden="true">G</span>
+      </button>
     </div>
   </div>
 
-  <Teleport to="body">
-    <Transition name="image-lightbox">
-      <div v-if="lightbox.open" class="image-lightbox" role="dialog" aria-modal="true" aria-label="文章图片预览" @click.self="closeImageLightbox">
-        <div class="image-lightbox__chrome">
-          <div class="image-lightbox__meta">
-            <span class="image-lightbox__signature" aria-hidden="true">✦</span>
-            <span>ORIGINAL IMAGE</span>
-          </div>
-          <div class="image-lightbox__actions">
-            <button class="image-lightbox__close" type="button" aria-label="关闭图片预览" @click="closeImageLightbox">
-              <span aria-hidden="true">×</span>
-            </button>
-          </div>
-        </div>
-
-        <figure class="image-lightbox__figure" :class="{ 'is-loading': lightbox.loading, 'is-error': lightbox.error }" @click.self="closeImageLightbox">
-          <div v-if="lightbox.loading && !lightbox.error" class="image-lightbox__loading" aria-live="polite">
-            <span class="image-lightbox__loading-mark" aria-hidden="true">✦</span>
-            <span>正在载入原图</span>
-          </div>
-          <div v-if="lightbox.error" class="image-lightbox__error">
-            <span class="image-lightbox__error-mark" aria-hidden="true">✦</span>
-            <strong>原图暂时无法载入</strong>
-            <span>你仍然可以通过右上角直接打开原图链接。</span>
-          </div>
-          <img
-            v-show="!lightbox.error"
-            class="image-lightbox__image"
-            :src="lightbox.src"
-            :alt="lightbox.alt"
-            @load="onLightboxImageLoad"
-            @error="onLightboxImageError"
-          />
-          <figcaption v-if="lightbox.alt" class="image-lightbox__caption">{{ lightbox.alt }}</figcaption>
-        </figure>
-      </div>
-    </Transition>
-  </Teleport>
+  <ArticleImageLightbox v-model="isLightboxOpen" :images="articleImages" :initial-index="lightboxInitialIndex" />
 
   <!-- 底部的信息栏 -->
   <FooterBar></FooterBar>
@@ -149,6 +132,7 @@ import FooterBar from "../components/FooterBar.vue";
 import MobileDrawer from "../components/MobileDrawer.vue";
 
 import ChapterBlock from "../components/article-page/ChapterBlock.vue";
+import ArticleImageLightbox from "../components/article-page/ArticleImageLightbox.vue";
 import PrevNext from "../components/article-page/PrevNext.vue";
 import CommentForm from "../components/article-page/CommentForm.vue";
 
@@ -166,18 +150,14 @@ const props = defineProps({
 });
 
 const isMobileMenuOpen = ref(false);
-const lightbox = ref({
-  open: false,
-  src: "",
-  alt: "",
-  loading: false,
-  error: false,
-});
-let previousDocumentOverflow = "";
+const isCatalogVisible = ref(true);
+const isLightboxOpen = ref(false);
+const lightboxInitialIndex = ref(0);
 
 const article = ref({ id: "", content: "", meta: { title: "", date: "", category: "", tags: [], csdn: "", juejin: "", github: "", gitee: "" }, views: 0 });
 const renderedHtml = ref("");
 const headings = ref([]);
+const articleImages = ref([]);
 
 function closeMobileMenu() {
   isMobileMenuOpen.value = false;
@@ -185,6 +165,15 @@ function closeMobileMenu() {
 
 function toggleMobileMenu() {
   isMobileMenuOpen.value = !isMobileMenuOpen.value;
+}
+
+function toggleCatalog() {
+  isCatalogVisible.value = !isCatalogVisible.value;
+  try {
+    localStorage.setItem("article-catalog-visible", String(isCatalogVisible.value));
+  } catch {
+    // Storage can be unavailable in privacy-restricted browser contexts.
+  }
 }
 
 /**
@@ -224,48 +213,17 @@ async function copyCode(text) {
   document.body.removeChild(textarea);
 }
 
-function openImageLightbox(src, alt = "") {
-  if (!src) return;
-
-  previousDocumentOverflow = document.documentElement.style.overflow;
-  document.documentElement.style.overflow = "hidden";
-  lightbox.value = {
-    open: true,
-    src,
-    alt,
-    loading: true,
-    error: false,
-  };
-}
-
 function closeImageLightbox() {
-  if (!lightbox.value.open) return;
-  lightbox.value.open = false;
-  document.documentElement.style.overflow = previousDocumentOverflow;
-}
-
-function onLightboxImageLoad() {
-  lightbox.value.loading = false;
-  lightbox.value.error = false;
-}
-
-function onLightboxImageError() {
-  lightbox.value.loading = false;
-  lightbox.value.error = true;
-}
-
-function onWindowKeydown(event) {
-  if (event.key === "Escape" && lightbox.value.open) {
-    closeImageLightbox();
-  }
+  isLightboxOpen.value = false;
 }
 
 async function onArticleContentClick(event) {
   const imageLink = event.target?.closest(".markdown-image-link");
   if (imageLink) {
     event.preventDefault();
-    const image = imageLink.querySelector("img");
-    openImageLightbox(imageLink.dataset.originalSrc || imageLink.href, image?.alt || "");
+    const index = Number.parseInt(imageLink.dataset.imageIndex || "0", 10);
+    lightboxInitialIndex.value = Number.isInteger(index) ? index : 0;
+    isLightboxOpen.value = true;
     return;
   }
 
@@ -292,6 +250,7 @@ function updateRenderedContent() {
   const result = renderMarkdown(article.value.content || "");
   renderedHtml.value = result.html;
   headings.value = result.headings;
+  articleImages.value = result.images;
 }
 
 async function loadArticle() {
@@ -314,17 +273,18 @@ function handleResize() {
 }
 
 onMounted(async () => {
+  try {
+    const savedCatalogState = localStorage.getItem("article-catalog-visible");
+    if (savedCatalogState !== null) isCatalogVisible.value = savedCatalogState === "true";
+  } catch {
+    // Keep the default when storage is unavailable.
+  }
   window.addEventListener("resize", handleResize, { passive: true });
-  window.addEventListener("keydown", onWindowKeydown);
   await loadArticle();
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("resize", handleResize);
-  window.removeEventListener("keydown", onWindowKeydown);
-  if (lightbox.value.open) {
-    document.documentElement.style.overflow = previousDocumentOverflow;
-  }
 });
 
 watch(
@@ -360,6 +320,16 @@ watch(
   padding-bottom: 40px;
   gap: 48px;
   align-items: flex-start;
+}
+
+.article-layout.is-catalog-hidden {
+  justify-content: center;
+}
+
+.article-layout.is-catalog-hidden .content.article-shell {
+  flex: 0 1 860px;
+  width: min(100%, 860px);
+  margin-inline: auto;
 }
 
 .card-surface,
@@ -657,6 +627,13 @@ watch(
   background: transparent;
 }
 
+.markdown-body :deep(.code-block ::selection),
+.markdown-body :deep(> pre ::selection) {
+  background: color-mix(in srgb, var(--accent) 38%, #ffffff);
+  color: #17233a;
+  text-shadow: none;
+}
+
 .markdown-body :deep(blockquote) {
   padding: 10px 22px;
   border-left: 3px solid var(--brand-support);
@@ -772,26 +749,6 @@ watch(
 
 .message-icon {
   background: url("../assets/svgs/message-48.svg") no-repeat center;
-  background-size: 60%;
-}
-
-.csdn-icon {
-  background: url("../assets/svgs/csdn-48.svg") no-repeat center;
-  background-size: 60%;
-}
-
-.juejin-icon {
-  background: url("../assets/svgs/juejin-48.svg") no-repeat center;
-  background-size: 60%;
-}
-
-.github-icon {
-  background: url("../assets/svgs/github-48.svg") no-repeat center;
-  background-size: 60%;
-}
-
-.gitee-icon {
-  background: url("../assets/svgs/gitee-48.svg") no-repeat center;
   background-size: 60%;
 }
 
@@ -1312,6 +1269,9 @@ watch(
   .sidebar {
     display: none !important;
   }
+  .fab-catalog {
+    display: none !important;
+  }
   .content.article-shell,
   .article-shell,
   .article-header,
@@ -1704,6 +1664,24 @@ watch(
     transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
     color 180ms ease;
 }
+.fab-catalog__icon {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  transform: translateY(-1px);
+}
+.fab-external {
+  display: grid;
+  place-items: center;
+}
+.fab-external__letter {
+  color: var(--app-text-muted);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 760;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  transition: color 180ms ease, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
 .fab-item:hover {
   border-color: var(--accent-line);
   background-color: color-mix(in srgb, var(--app-surface) 93%, var(--accent) 2%);
@@ -1720,6 +1698,14 @@ watch(
 #to-bottom:hover .fab-direction {
   transform: translateY(2px);
   color: var(--accent);
+}
+.fab-catalog:hover .fab-catalog__icon {
+  color: var(--accent);
+  transform: translateY(-1px) scale(1.05);
+}
+.fab-external:hover .fab-external__letter {
+  color: var(--accent);
+  transform: scale(1.06);
 }
 
 @media (max-width: 900px) {
@@ -1853,5 +1839,32 @@ watch(
   .fab-item:hover {
     transform: translateY(-1px);
   }
+}
+
+/* A collapsed catalog turns the page into a centered reading column. */
+.article-layout.is-catalog-hidden .article-header,
+.article-layout.is-catalog-hidden .article-content,
+.article-layout.is-catalog-hidden .next-previous-article,
+.article-layout.is-catalog-hidden .comments-content {
+  width: 100%;
+  margin-inline: auto;
+}
+
+.article-layout.is-catalog-hidden .markdown-body :deep(> p),
+.article-layout.is-catalog-hidden .markdown-body :deep(> ul),
+.article-layout.is-catalog-hidden .markdown-body :deep(> ol),
+.article-layout.is-catalog-hidden .markdown-body :deep(> blockquote),
+.article-layout.is-catalog-hidden .markdown-body :deep(> h1),
+.article-layout.is-catalog-hidden .markdown-body :deep(> h2),
+.article-layout.is-catalog-hidden .markdown-body :deep(> h3),
+.article-layout.is-catalog-hidden .markdown-body :deep(> h4),
+.article-layout.is-catalog-hidden .markdown-body :deep(> h5),
+.article-layout.is-catalog-hidden .markdown-body :deep(> h6),
+.article-layout.is-catalog-hidden .markdown-body :deep(> hr),
+.article-layout.is-catalog-hidden .markdown-body :deep(> pre),
+.article-layout.is-catalog-hidden .markdown-body :deep(> table),
+.article-layout.is-catalog-hidden .markdown-body :deep(> .code-block) {
+  width: 100%;
+  margin-inline: auto;
 }
 </style>

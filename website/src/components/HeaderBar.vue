@@ -5,7 +5,7 @@
         <button v-if="showMobileMenu" class="mobile-menu-btn" type="button" aria-label="打开导航菜单" @click="toggleMobileMenu()">
           <span class="material-symbols-rounded" aria-hidden="true">menu</span>
         </button>
-        <a class="brand-link" href="/">
+        <a class="brand-link" href="/" draggable="true" @dragstart="onLinkDragStart">
           <span class="app-logo"></span>
           <span class="brand-copy">
             <span class="brand-name">Hi 爬楼的猪</span>
@@ -17,10 +17,10 @@
       <nav class="header-nav" aria-label="主导航">
         <ul ref="navAllRef" class="nav-menu">
           <li v-for="item in navItems" :key="item.label" :class="['nav-item', { active: isActive(item) }]">
-            <a :href="item.href" :aria-current="isActive(item) ? 'page' : undefined">{{ item.label }}</a>
+            <a :href="item.href" draggable="true" :aria-current="isActive(item) ? 'page' : undefined" @dragstart="onLinkDragStart">{{ item.label }}</a>
           </li>
           <li v-for="nav in navs" :key="nav.title" class="nav-item nav-item--external">
-            <a :href="nav.url" target="_blank" rel="noopener noreferrer">
+            <a :href="nav.url" target="_blank" rel="noopener noreferrer" draggable="true" @dragstart="onLinkDragStart">
               {{ nav.title }}
               <span v-if="nav.new" class="nav-badge">new</span>
             </a>
@@ -117,6 +117,15 @@ function isActive(item) {
   if (item.href === "/") return route.path === "/";
   if (item.href === "/articles" && route.path.startsWith("/article/")) return true;
   return route.path === item.href || route.path.startsWith(`${item.href}/`);
+}
+
+function onLinkDragStart(event) {
+  const url = event.currentTarget?.href;
+  if (!url || !event.dataTransfer) return;
+
+  event.dataTransfer.effectAllowed = "link";
+  event.dataTransfer.setData("text/uri-list", url);
+  event.dataTransfer.setData("text/plain", url);
 }
 
 function handleScroll() {
