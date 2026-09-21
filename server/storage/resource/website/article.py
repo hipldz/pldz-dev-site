@@ -58,7 +58,7 @@ class ArticleResourceStore:
             text = frontmatter.dumps(post)
             if replace:
                 # 对text全部的图像的数据进行字符串替换
-                text = text.replace('/api/v1/image/', 'https://pldz1.com/api/v1/image/')
+                text = text.replace('/api/v1/image/', 'https://hipldz.com/api/v1/image/')
             return text
         except Exception as e:
             Logger.error(f"❗ 无法转换为 Markdown 格式: {e}")

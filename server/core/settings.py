@@ -102,7 +102,7 @@ class Settings:
             "access_token_expire_minutes": positive_int("ACCESS_TOKEN_EXPIRE_MINUTES", 30),
             "refresh_token_expire_days": positive_int("REFRESH_TOKEN_EXPIRE_DAYS", 7),
             "two_factor_issuer": text("TWO_FACTOR_ISSUER", "pldz-dev-site"),
-            "admin_username": text("ADMIN_USERNAME", "admin@pldz1.com"),
+            "admin_username": text("ADMIN_USERNAME", "admin@hipldz.com"),
             "admin_password": text("ADMIN_PASSWORD", "123", report_missing=False),
             "site_host": text("SITE_HOST", "127.0.0.1"),
             "site_port": positive_int("SITE_PORT", 10058, maximum=65535),

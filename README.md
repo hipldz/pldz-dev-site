@@ -1,6 +1,6 @@
 # pldz-dev-site
 
-`pldz-dev-site` 是我个人网站 `pldz1.com` 的源码
+`pldz-dev-site` 是我个人网站 `hipldz.com` 的源码
 
 ## 项目定位
 
@@ -187,13 +187,13 @@ SECRET_KEY=change-me
 ACCESS_TOKEN_EXPIRE_MINUTES=3600
 REFRESH_TOKEN_EXPIRE_DAYS=7
 
-ADMIN_USERNAME=admin@pldz1.com
+ADMIN_USERNAME=admin@hipldz.com
 ADMIN_PASSWORD=123
 
 SITE_HOST=127.0.0.1
 SITE_PORT=10058
 SITE_NAME=Hi 爬楼的猪
-SITE_COPYRIGHT=©2026 pldz1.com
+SITE_COPYRIGHT=©2026 hipldz.com
 SITE_ICP=京ICP备: 180xxxxx号-x
 SITE_PS=京公网安备11xxxxxxxx9号
 
@@ -219,20 +219,20 @@ openssl rand -hex 32
 
 关键路径的含义：
 
-| 环境变量          | 默认值            | 作用                         |
-| ----------------- | ----------------- | ---------------------------- |
-| `ARTICLES_PATH`   | `data/articles`   | Markdown 文章目录            |
-| `IMAGES_PATH`     | `data/images`     | 图片根目录                   |
-| `WWW_PATH`        | `data/www`        | 前端构建产物和 Demo 模板目录 |
-| `RESOURCES_PATH`  | `data/resources`  | 导航、广告、协议等资源配置   |
-| `CACHE_PATH`      | `data/cache`      | 管理后台缓存资源目录         |
-| `WEBP_CACHE_PATH` | `data/cache/webp` | 图片派生缓存目录             |
-| `DB_PATH`         | `data/db`         | JSON 数据库目录              |
-| `SECRET_KEY`      | 无安全默认值      | JWT 签名密钥                 |
-| `ADMIN_USERNAME`  | `admin@pldz1.com` | 管理员账号                   |
-| `ADMIN_PASSWORD`  | `123`             | 管理员密码                   |
-| `SITE_HOST`       | `127.0.0.1`       | FastAPI 绑定地址             |
-| `SITE_PORT`       | `10058`           | FastAPI 绑定端口             |
+| 环境变量          | 默认值             | 作用                         |
+| ----------------- | ------------------ | ---------------------------- |
+| `ARTICLES_PATH`   | `data/articles`    | Markdown 文章目录            |
+| `IMAGES_PATH`     | `data/images`      | 图片根目录                   |
+| `WWW_PATH`        | `data/www`         | 前端构建产物和 Demo 模板目录 |
+| `RESOURCES_PATH`  | `data/resources`   | 导航、广告、协议等资源配置   |
+| `CACHE_PATH`      | `data/cache`       | 管理后台缓存资源目录         |
+| `WEBP_CACHE_PATH` | `data/cache/webp`  | 图片派生缓存目录             |
+| `DB_PATH`         | `data/db`          | JSON 数据库目录              |
+| `SECRET_KEY`      | 无安全默认值       | JWT 签名密钥                 |
+| `ADMIN_USERNAME`  | `admin@hipldz.com` | 管理员账号                   |
+| `ADMIN_PASSWORD`  | `123`              | 管理员密码                   |
+| `SITE_HOST`       | `127.0.0.1`        | FastAPI 绑定地址             |
+| `SITE_PORT`       | `10058`            | FastAPI 绑定端口             |
 
 ## 后端启动流程
 
@@ -970,7 +970,7 @@ data/articles/others/Codex简单使用.md
 
 ```yaml
 ---
-author: admin@pldz1.com
+author: admin@hipldz.com
 category: cloud-service
 csdn: ""
 date: "2025-08-15"
