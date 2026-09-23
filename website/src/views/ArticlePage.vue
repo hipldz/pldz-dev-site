@@ -548,11 +548,12 @@ watch(
 
 .markdown-body :deep(pre) {
   padding: 22px 24px;
+  max-height: 480px;
   line-height: 1.7;
   border-radius: var(--app-radius-lg);
   background: #25334b;
   color: #e8eaed;
-  overflow-x: auto;
+  overflow: auto;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
