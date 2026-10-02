@@ -38,6 +38,20 @@
 - `website/src/utils/apis/*.js`
 - `website/src/views/*.vue`
 
+#### 字体与弱网显示
+
+字体资源保存在 `website/src/assets/fonts/`，随网站自身托管，页面不再请求 Google Fonts 的外部样式表或字体文件。
+
+- Manrope：用于正文和标题，保留 `400–800` 可变字重。
+- Caveat：用于手写风格装饰文字，保留 `500–600` 可变字重。
+- 两款文字字体只包含 Latin 字符，中文沿用系统字体栈。
+- 文字字体使用 `font-display: optional`：弱网首次访问时及时显示系统字体，并避免较晚切换字体造成布局跳动；加载及时或已有缓存时可以使用自定义字体。
+- 加载页始终使用系统字体，不等待自定义字体下载。
+- Material Symbols Rounded 仅保留源码引用的图标，当前为 49 个、约 13 KB；通过 `?inline` 随 CSS 内联，避免额外字体请求和图标名称短暂露出。
+- Vite 为文字字体生成带内容哈希的文件名，便于缓存和更新。
+
+字体维护方式和许可文件见 [字体资源说明](website/src/assets/fonts/README.md)。
+
 ### 后端
 
 - Python `3.11`
@@ -1450,6 +1464,25 @@ JSON Store 使用线程锁与 POSIX `flock` 保护完整读改写事务，并通
 Vite 默认输出 `website/dist`，Nginx 当前服务 `data/www/website`。如果部署时发现页面不是最新版本，要检查构建产物是否同步到了 Nginx 挂载目录。
 
 ## 常见维护任务
+
+### 更新字体或新增图标
+
+修改图标名称后，在 `website/` 下运行维护脚本，重新生成字体文件、样式表和图标清单。需要 Node.js 22 或更新版本，以及能访问 Google Fonts 和 GitHub 的网络：
+
+```bash
+cd website
+node scripts/update-fonts.mjs
+```
+
+使用 HTTP(S) 代理时，需要 Node.js 22.21 或更新版本，并通过环境变量配置代理后运行：
+
+```bash
+node --use-env-proxy scripts/update-fonts.mjs
+```
+
+脚本会收集图标 `<span>` 中的静态名称和条件分支、`icon` 数据属性，以及传入组件的 `icon` 属性。新增其他图标选择方式时，需要调整脚本并检查 `website/src/assets/fonts/icons.json` 是否包含所需名称。
+
+更新后格式化生成文件，执行 `npm run build`，并将 `website/src/assets/fonts/` 中的变更一起提交。脚本仅在维护字体时运行，日常开发和构建直接使用仓库内的字体资源，无需联网下载字体。
 
 ### 新增一篇文章
 
