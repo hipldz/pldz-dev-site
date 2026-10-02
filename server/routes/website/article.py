@@ -1,7 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from urllib.parse import quote
+
+from fastapi import APIRouter, Depends, HTTPException, Header, Response
+from pydantic import BaseModel, Field
 
 from routes.dependencies import current_user, ensure_admin_user
 from services.website.article import ArticleService
+from services.website.draft_share import DraftShareError, DraftShareExpiredError, create_draft_share, get_shared_draft
 from typedef import (
     ArticleDetailResponse,
     ArticleIndexRecord,
@@ -55,6 +59,35 @@ async def get_draft_by_id(article_id: str, user: dict = Depends(_draft_admin)):
     if not article:
         raise HTTPException(status_code=404, detail="草稿不存在")
     return ArticleDetailResponse(data=article)
+
+
+class DraftShareRequest(BaseModel):
+    duration_minutes: int = Field(default=1440, ge=1, le=525600)
+
+
+@ARTICLES_ROUTER.post("/draft/{article_id}/share")
+async def share_draft(article_id: str, data: DraftShareRequest, response: Response, user: dict = Depends(_draft_admin)):
+    try:
+        share = create_draft_share(article_id, data.duration_minutes)
+    except DraftShareError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    response.headers["Cache-Control"] = "no-store"
+    return {"data": {"url": f"/share/drafts/{quote(article_id, safe='')}#token={share['token']}", "expiresAt": share["expiresAt"]}}
+
+
+@ARTICLES_ROUTER.get("/shared/{article_id}")
+async def read_shared_draft(article_id: str, response: Response, authorization: str = Header(default="")):
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        raise HTTPException(status_code=404, detail="分享链接无效")
+    try:
+        share = get_shared_draft(article_id, token)
+    except DraftShareExpiredError as error:
+        raise HTTPException(status_code=410, detail=str(error)) from error
+    except DraftShareError as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    response.headers["Cache-Control"] = "no-store"
+    return ArticleDetailResponse(data=dict(share["article"], shareExpiresAt=share["expiresAt"]))
 
 
 @ARTICLES_ROUTER.get("/all/category")

@@ -16,7 +16,11 @@
     </aside>
     <!-- 中间内容区 -->
     <main class="content article-shell">
-      <header class="article-header card-surface">
+      <div v-if="readError" class="article-header card-surface" role="alert">
+        <h1 class="article-title">{{ readError }}</h1>
+        <p>{{ isShared ? "请联系文章作者获取新的分享链接。" : "请稍后重试。" }}</p>
+      </div>
+      <header v-else class="article-header card-surface">
         <div class="article-topline">
           <div class="article-kicker" aria-label="文章信息">
             <span class="article-signature" aria-hidden="true">✦</span>
@@ -26,14 +30,15 @@
           </div>
           <p class="layout-handnote article-handnote" aria-hidden="true">Read, think, write.</p>
         </div>
-        <div v-if="isDraftPreview" class="draft-preview-notice">
-          <span>草稿 · DRAFT · 仅管理员可见</span>
-          <a href="/admin/drafts">返回草稿列表</a>
+        <div v-if="isDraft" class="draft-preview-notice">
+          <span>{{ isShared ? "草稿 · 临时分享" : "草稿 · DRAFT · 仅管理员可见" }}</span>
+          <span v-if="isShared && expiresAt">有效至 {{ new Date(expiresAt).toLocaleString() }}</span>
+          <a v-if="!isShared || store.state.authState.isadmin" href="/admin/drafts">返回草稿列表</a>
         </div>
         <h1 class="article-title">{{ article.meta.title }}</h1>
         <div class="article-meta">
           <time class="article-meta-item" :datetime="article.meta.date">{{ article.meta.date }}</time>
-          <span v-if="!isDraftPreview">{{ article.views }} 次阅读</span>
+          <span v-if="!isDraft">{{ article.views }} 次阅读</span>
           <span v-if="headings.length">{{ headings.length }} 个章节</span>
         </div>
         <div v-if="article.meta.tags?.length" class="article-tags" aria-label="文章标签">
@@ -41,14 +46,14 @@
         </div>
       </header>
 
-      <div class="article-content card-surface" @click="onArticleContentClick">
+      <div v-if="!readError" class="article-content card-surface" @click="onArticleContentClick">
         <article class="markdown-body" v-html="renderedHtml"></article>
       </div>
-      <div v-if="!isDraftPreview" class="next-previous-article card-surface">
+      <div v-if="!isDraft" class="next-previous-article card-surface">
         <span>其他文章</span>
         <PrevNext :id="article.id" :category="article.meta.category"></PrevNext>
       </div>
-      <div v-if="!isDraftPreview" class="comments-content card-surface">
+      <div v-if="!isDraft" class="comments-content card-surface">
         <span> 评论留言 </span>
         <CommentForm :article-id="article.id"></CommentForm>
       </div>
@@ -140,10 +145,9 @@ import ArticleImageLightbox from "../components/article-page/ArticleImageLightbo
 import PrevNext from "../components/article-page/PrevNext.vue";
 import CommentForm from "../components/article-page/CommentForm.vue";
 
-import { onActivated, onDeactivated, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { onActivated, onDeactivated, onBeforeUnmount, onMounted, computed, ref, watch } from "vue";
 import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-import { getArticle, getDraftArticle } from "../utils/apis";
+import { useArticleReader } from "../utils/use-article-reader.js";
 import { renderMarkdown } from "../utils/markdown.js";
 import { refreshAnalyticsBindings, trackArticleView } from "../utils/analytics";
 
@@ -153,29 +157,22 @@ const props = defineProps({
     required: true,
     default: "",
   },
-  isDraftPreview: { type: Boolean, default: false },
+  mode: { type: String, default: "published", validator: (value) => ["published", "draft", "shared"].includes(value) },
+  shareToken: { type: String, default: "" },
 });
 
 const store = useStore();
-const router = useRouter();
+const { article, error: readError, expiresAt, isDraft, isShared } = useArticleReader(props);
 
 const isMobileMenuOpen = ref(false);
 const isCatalogVisible = ref(true);
 const isLightboxOpen = ref(false);
 const lightboxInitialIndex = ref(0);
 
-const emptyArticle = () => ({
-  id: "",
-  content: "",
-  meta: { title: "", date: "", category: "", tags: [], csdn: "", juejin: "", github: "", gitee: "" },
-  views: 0,
-});
-const article = ref(emptyArticle());
-const renderedHtml = ref("");
-const headings = ref([]);
-const articleImages = ref([]);
-let articleRequestId = 0;
-let isPageActive = true;
+const markdown = computed(() => renderMarkdown(article.value.content || ""));
+const renderedHtml = computed(() => markdown.value.html);
+const headings = computed(() => markdown.value.headings);
+const articleImages = computed(() => markdown.value.images);
 
 function closeMobileMenu() {
   isMobileMenuOpen.value = false;
@@ -264,62 +261,13 @@ async function onArticleContentClick(event) {
   }, 1500);
 }
 
-function updateRenderedContent() {
-  const result = renderMarkdown(article.value.content || "");
-  renderedHtml.value = result.html;
-  headings.value = result.headings;
-  articleImages.value = result.images;
-}
-
-async function loadArticle() {
-  if (!isPageActive) return;
-  const requestId = ++articleRequestId;
-  if (article.value.isDraft) {
-    article.value = emptyArticle();
-    updateRenderedContent();
-    closeImageLightbox();
-  }
-  if (props.isDraftPreview) {
-    if (!store.state.authState.ready) return;
-    if (!store.state.authState.isadmin) {
-      article.value = emptyArticle();
-      updateRenderedContent();
-      closeImageLightbox();
-      router.replace("/404");
-      return;
-    }
-  }
-  let res;
-  try {
-    res = props.isDraftPreview ? await getDraftArticle(props.id) : await getArticle(props.id);
-  } catch {
-    if (requestId === articleRequestId && props.isDraftPreview) router.replace("/404");
-    return;
-  }
-  if (requestId !== articleRequestId) return;
-  if (!res || (props.isDraftPreview && !res.isDraft)) {
-    if (props.isDraftPreview) router.replace("/404");
-    return;
-  }
-
-  article.value = res;
-  updateRenderedContent();
-  if (!props.isDraftPreview) {
-    trackArticleView({
-      articleId: res.id,
-      articleTitle: res.meta?.title || res.id,
-    });
-  }
-  refreshAnalyticsBindings();
-}
-
 function handleResize() {
   if (window.innerWidth > 768) {
     closeMobileMenu();
   }
 }
 
-onMounted(async () => {
+onMounted(() => {
   try {
     const savedCatalogState = localStorage.getItem("article-catalog-visible");
     if (savedCatalogState !== null) isCatalogVisible.value = savedCatalogState === "true";
@@ -327,46 +275,28 @@ onMounted(async () => {
     // Keep the default when storage is unavailable.
   }
   window.addEventListener("resize", handleResize, { passive: true });
-  await loadArticle();
 });
 
 onBeforeUnmount(() => {
-  articleRequestId += 1;
   window.removeEventListener("resize", handleResize);
 });
-
 onDeactivated(() => {
-  isPageActive = false;
-  articleRequestId += 1;
   closeImageLightbox();
-  if (article.value.isDraft) {
-    article.value = emptyArticle();
-    updateRenderedContent();
-  }
   window.removeEventListener("resize", handleResize);
 });
-
 onActivated(() => {
-  if (isPageActive) return;
-  isPageActive = true;
   window.addEventListener("resize", handleResize, { passive: true });
-  void loadArticle();
-});
-
-watch([() => props.id, () => props.isDraftPreview], async () => {
-  closeImageLightbox();
-  await loadArticle();
-});
-
-watch([() => store.state.authState.ready, () => store.state.authState.isadmin], () => {
-  if (props.isDraftPreview) void loadArticle();
 });
 
 watch(
-  () => article.value.content,
-  () => {
-    updateRenderedContent();
+  article,
+  (document) => {
+    closeImageLightbox();
+    if (!document.id) return;
+    if (!isDraft.value) trackArticleView({ articleId: document.id, articleTitle: document.meta?.title || document.id });
+    refreshAnalyticsBindings();
   },
+  { flush: "post" },
 );
 </script>
 

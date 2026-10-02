@@ -20,26 +20,31 @@
             <small>{{ draft.category || "未分类" }} · {{ draft.date || "未注明日期" }}</small>
             <code>{{ draft.path }}</code>
           </div>
-          <a class="btn btn-info" :href="`/admin/drafts/${encodeURIComponent(draft.id)}/preview`" target="_blank" rel="noopener noreferrer">在新窗口预览</a>
+          <div class="draft-actions">
+            <a class="btn btn-info" :href="`/admin/drafts/${encodeURIComponent(draft.id)}/preview`" target="_blank" rel="noopener noreferrer">在新窗口预览</a>
+            <button class="btn btn-outline" type="button" @click="shareDraft = draft">临时分享</button>
+          </div>
         </div>
       </div>
       <div v-else class="empty-state">
         <p>{{ drafts.length ? "没有匹配的草稿。" : "暂无文章草稿。" }}</p>
       </div>
     </div>
+    <DraftShareDialog v-if="shareDraft" :draft="shareDraft" @close="shareDraft = null" />
   </div>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { getDraftArticles } from "../../utils/apis";
+import { computed, onBeforeUnmount, onDeactivated, onMounted, ref } from "vue";
+import { getDraftArticles } from "../../utils/apis/drafts.js";
+import DraftShareDialog from "./DraftShareDialog.vue";
 
 const drafts = ref([]);
 const keyword = ref("");
 const loading = ref(false);
 const error = ref("");
 let requestId = 0;
-
+const shareDraft = ref(null);
 const filteredDrafts = computed(() => {
   const query = keyword.value.toLocaleLowerCase();
   return drafts.value.filter((draft) => `${draft.title} ${draft.category} ${draft.path}`.toLocaleLowerCase().includes(query));
@@ -67,6 +72,10 @@ async function loadDrafts() {
 onMounted(loadDrafts);
 onBeforeUnmount(() => {
   requestId += 1;
+  shareDraft.value = null;
+});
+onDeactivated(() => {
+  shareDraft.value = null;
 });
 </script>
 
@@ -105,5 +114,10 @@ onBeforeUnmount(() => {
 }
 .draft-row a {
   text-decoration: none;
+}
+.draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 </style>

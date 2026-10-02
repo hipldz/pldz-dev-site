@@ -2,14 +2,6 @@ import { apiGet, websitePrefix } from "./request.js";
 
 const articlePrefix = `${websitePrefix}/article`;
 
-export function getDraftArticles() {
-  return apiGet(`${articlePrefix}/drafts`);
-}
-
-export function getDraftArticle(articleId) {
-  return apiGet(`${articlePrefix}/draft/${encodeURIComponent(articleId)}`);
-}
-
 export function getAllArticles() {
   return apiGet(`${articlePrefix}/all/article`);
 }

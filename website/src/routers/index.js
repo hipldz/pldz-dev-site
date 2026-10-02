@@ -28,7 +28,16 @@ const router = createRouter({
     {
       path: "/admin/drafts/:id/preview",
       component: ArticlePage,
-      props: (route) => ({ id: route.params.id, isDraftPreview: true }),
+      props: (route) => ({ id: route.params.id, mode: "draft" }),
+    },
+    {
+      path: "/share/drafts/:id",
+      component: ArticlePage,
+      props: (route) => ({
+        id: route.params.id,
+        mode: "shared",
+        shareToken: new URLSearchParams(route.hash.slice(1)).get("token") || "",
+      }),
     },
     {
       path: "/admin/:id?",
