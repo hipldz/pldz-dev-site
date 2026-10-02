@@ -1,5 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 
+from routes.dependencies import current_user, ensure_admin_user
 from services.website.article import ArticleService
 from typedef import (
     ArticleDetailResponse,
@@ -31,11 +32,29 @@ def _to_summary(article: ArticleIndexRecord) -> ArticleSummary:
         juejin=meta.get("juejin", ""),
         github=meta.get("github", ""),
         gitee=meta.get("gitee", ""),
+        isDraft=article.get("isDraft", False),
     )
 
 
 def _summaries(articles: list[ArticleIndexRecord]) -> ArticleListResponse:
     return ArticleListResponse(data=[_to_summary(article) for article in articles])
+
+
+def _draft_admin(user: dict = Depends(current_user)) -> dict:
+    return ensure_admin_user(user, login_detail="请先登录", forbidden_detail="仅管理员可查看草稿")
+
+
+@ARTICLES_ROUTER.get("/drafts")
+async def get_drafts(user: dict = Depends(_draft_admin)):
+    return _summaries(ArticleService.get_drafts())
+
+
+@ARTICLES_ROUTER.get("/draft/{article_id}")
+async def get_draft_by_id(article_id: str, user: dict = Depends(_draft_admin)):
+    article = ArticleService.get_draft_by_id(article_id)
+    if not article:
+        raise HTTPException(status_code=404, detail="草稿不存在")
+    return ArticleDetailResponse(data=article)
 
 
 @ARTICLES_ROUTER.get("/all/category")

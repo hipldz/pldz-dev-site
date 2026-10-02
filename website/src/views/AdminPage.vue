@@ -45,6 +45,7 @@
           <AnalyticsMgt v-if="activeMenuKey === 'analytics'"></AnalyticsMgt>
           <UserMgt v-if="activeMenuKey === 'usermgt'"></UserMgt>
           <SecurityMgt v-if="activeMenuKey === 'security'"></SecurityMgt>
+          <DraftMgt v-if="activeMenuKey === 'drafts'"></DraftMgt>
           <ImageMgt v-if="activeMenuKey === 'imagemgt'" :all-categories="allCategories" :is-loading="isCategoriesLoading"></ImageMgt>
           <ResourceMgt v-if="activeMenuKey === 'resourcemgt'"></ResourceMgt>
           <CacheMgt v-if="activeMenuKey === 'cachemgt'"></CacheMgt>
@@ -73,11 +74,12 @@ import ImageMgt from "../components/admin-page/ImageMgt.vue";
 import ResourceMgt from "../components/admin-page/ResourceMgt.vue";
 import CacheMgt from "../components/admin-page/CacheMgt.vue";
 import SecurityMgt from "../components/admin-page/SecurityMgt.vue";
+import DraftMgt from "../components/admin-page/DraftMgt.vue";
 import WwwDeployMgt from "../components/admin-page/WwwDeployMgt.vue";
 
 import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onActivated, watch } from "vue";
 import { getAllCategories } from "../utils/apis";
 import Toast from "../utils/toast.js";
 import { useLoading } from "../utils/use-loading";
@@ -97,6 +99,11 @@ const menuItems = [
     icon: "chart",
     caption: "查看 PV/UV、文章点击和按钮点击",
     gradient: "linear-gradient(135deg, #4f72bf 0%, #78a7cf 100%)",
+    requiresCategories: false,
+  },
+  {
+    key: "drafts",
+    name: "文章草稿",
     requiresCategories: false,
   },
   {
@@ -218,6 +225,7 @@ async function fetchCategories({ showSuccessToast = false } = {}) {
 }
 
 function syncActiveFromRoute(id) {
+  if (!route.matched.some((record) => record.path === "/admin/:id?")) return;
   if (id && routeMap[id]) {
     activeMenuKey.value = id;
     return;
@@ -236,6 +244,7 @@ function syncActiveFromRoute(id) {
 }
 
 async function initializeAdminPage() {
+  if (!route.matched.some((record) => record.path === "/admin/:id?")) return;
   if (!isAuthReady.value) {
     return;
   }
@@ -258,6 +267,8 @@ async function initializeAdminPage() {
 onMounted(() => {
   initializeAdminPage();
 });
+
+onActivated(initializeAdminPage);
 
 watch([isAuthReady, isAdmin], initializeAdminPage);
 

@@ -9,10 +9,20 @@ from storage.db.website.article import (
     find_article_intros,
     find_articles_by_category,
     find_articles_by_tag,
+    find_drafts,
+    find_draft_by_id,
 )
 
 
 class ArticleService:
+    @classmethod
+    def get_drafts(cls) -> list[ArticleIndexRecord]:
+        return find_drafts()
+
+    @classmethod
+    def get_draft_by_id(cls, article_id: str) -> Optional[ArticleIndexRecord]:
+        return find_draft_by_id(article_id)
+
     @classmethod
     def get_all_categories(cls) -> list[str]:
         return find_all_categories()

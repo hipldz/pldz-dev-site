@@ -41,10 +41,10 @@
           <kbd class="search-trigger__kbd" aria-hidden="true">{{ shortcutLabel }}</kbd>
         </button>
 
-        <div v-if="avatar" class="user-avatar" @click="onToggleLoginForm">
-          <img :src="avatar" alt="avatar" />
-        </div>
-        <button v-else class="login-register-btn" @click="onToggleLoginForm">
+        <button v-if="username" class="user-avatar" type="button" aria-label="打开账号菜单" @click="onToggleLoginForm">
+          <img :src="avatar || '/api/v1/website/image/avatar/default.jpg'" alt="当前账号头像" />
+        </button>
+        <button v-else class="login-register-btn" type="button" aria-label="登录 / 注册" @click="onToggleLoginForm">
           <span class="material-symbols-rounded" aria-hidden="true">person</span><span>登录 / 注册</span>
         </button>
       </div>
@@ -548,6 +548,8 @@ onBeforeUnmount(deactivateHeader);
 }
 
 .user-avatar {
+  padding: 0;
+  background: var(--app-surface);
   width: 38px;
   height: 38px;
   overflow: hidden;

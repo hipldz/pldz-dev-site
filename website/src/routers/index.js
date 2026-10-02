@@ -26,6 +26,11 @@ const router = createRouter({
       props: true,
     },
     {
+      path: "/admin/drafts/:id/preview",
+      component: ArticlePage,
+      props: (route) => ({ id: route.params.id, isDraftPreview: true }),
+    },
+    {
       path: "/admin/:id?",
       component: AdminPage,
       props: true,

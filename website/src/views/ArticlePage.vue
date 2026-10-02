@@ -26,10 +26,14 @@
           </div>
           <p class="layout-handnote article-handnote" aria-hidden="true">Read, think, write.</p>
         </div>
+        <div v-if="isDraftPreview" class="draft-preview-notice">
+          <span>草稿 · DRAFT · 仅管理员可见</span>
+          <a href="/admin/drafts">返回草稿列表</a>
+        </div>
         <h1 class="article-title">{{ article.meta.title }}</h1>
         <div class="article-meta">
           <time class="article-meta-item" :datetime="article.meta.date">{{ article.meta.date }}</time>
-          <span>{{ article.views }} 次阅读</span>
+          <span v-if="!isDraftPreview">{{ article.views }} 次阅读</span>
           <span v-if="headings.length">{{ headings.length }} 个章节</span>
         </div>
         <div v-if="article.meta.tags?.length" class="article-tags" aria-label="文章标签">
@@ -40,11 +44,11 @@
       <div class="article-content card-surface" @click="onArticleContentClick">
         <article class="markdown-body" v-html="renderedHtml"></article>
       </div>
-      <div class="next-previous-article card-surface">
+      <div v-if="!isDraftPreview" class="next-previous-article card-surface">
         <span>其他文章</span>
         <PrevNext :id="article.id" :category="article.meta.category"></PrevNext>
       </div>
-      <div class="comments-content card-surface">
+      <div v-if="!isDraftPreview" class="comments-content card-surface">
         <span> 评论留言 </span>
         <CommentForm :article-id="article.id"></CommentForm>
       </div>
@@ -136,8 +140,10 @@ import ArticleImageLightbox from "../components/article-page/ArticleImageLightbo
 import PrevNext from "../components/article-page/PrevNext.vue";
 import CommentForm from "../components/article-page/CommentForm.vue";
 
-import { onBeforeUnmount, onMounted, ref, watch } from "vue";
-import { getArticle } from "../utils/apis";
+import { onActivated, onDeactivated, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+import { getArticle, getDraftArticle } from "../utils/apis";
 import { renderMarkdown } from "../utils/markdown.js";
 import { refreshAnalyticsBindings, trackArticleView } from "../utils/analytics";
 
@@ -147,17 +153,29 @@ const props = defineProps({
     required: true,
     default: "",
   },
+  isDraftPreview: { type: Boolean, default: false },
 });
+
+const store = useStore();
+const router = useRouter();
 
 const isMobileMenuOpen = ref(false);
 const isCatalogVisible = ref(true);
 const isLightboxOpen = ref(false);
 const lightboxInitialIndex = ref(0);
 
-const article = ref({ id: "", content: "", meta: { title: "", date: "", category: "", tags: [], csdn: "", juejin: "", github: "", gitee: "" }, views: 0 });
+const emptyArticle = () => ({
+  id: "",
+  content: "",
+  meta: { title: "", date: "", category: "", tags: [], csdn: "", juejin: "", github: "", gitee: "" },
+  views: 0,
+});
+const article = ref(emptyArticle());
 const renderedHtml = ref("");
 const headings = ref([]);
 const articleImages = ref([]);
+let articleRequestId = 0;
+let isPageActive = true;
 
 function closeMobileMenu() {
   isMobileMenuOpen.value = false;
@@ -254,15 +272,44 @@ function updateRenderedContent() {
 }
 
 async function loadArticle() {
-  const res = await getArticle(props.id);
-  if (!res) return;
+  if (!isPageActive) return;
+  const requestId = ++articleRequestId;
+  if (article.value.isDraft) {
+    article.value = emptyArticle();
+    updateRenderedContent();
+    closeImageLightbox();
+  }
+  if (props.isDraftPreview) {
+    if (!store.state.authState.ready) return;
+    if (!store.state.authState.isadmin) {
+      article.value = emptyArticle();
+      updateRenderedContent();
+      closeImageLightbox();
+      router.replace("/404");
+      return;
+    }
+  }
+  let res;
+  try {
+    res = props.isDraftPreview ? await getDraftArticle(props.id) : await getArticle(props.id);
+  } catch {
+    if (requestId === articleRequestId && props.isDraftPreview) router.replace("/404");
+    return;
+  }
+  if (requestId !== articleRequestId) return;
+  if (!res || (props.isDraftPreview && !res.isDraft)) {
+    if (props.isDraftPreview) router.replace("/404");
+    return;
+  }
 
   article.value = res;
   updateRenderedContent();
-  trackArticleView({
-    articleId: res.id,
-    articleTitle: res.meta?.title || res.id,
-  });
+  if (!props.isDraftPreview) {
+    trackArticleView({
+      articleId: res.id,
+      articleTitle: res.meta?.title || res.id,
+    });
+  }
   refreshAnalyticsBindings();
 }
 
@@ -284,17 +331,36 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  articleRequestId += 1;
   window.removeEventListener("resize", handleResize);
 });
 
-watch(
-  () => props.id,
-  async (newId, oldId) => {
-    if (!newId || newId === oldId) return;
-    closeImageLightbox();
-    await loadArticle();
-  },
-);
+onDeactivated(() => {
+  isPageActive = false;
+  articleRequestId += 1;
+  closeImageLightbox();
+  if (article.value.isDraft) {
+    article.value = emptyArticle();
+    updateRenderedContent();
+  }
+  window.removeEventListener("resize", handleResize);
+});
+
+onActivated(() => {
+  if (isPageActive) return;
+  isPageActive = true;
+  window.addEventListener("resize", handleResize, { passive: true });
+  void loadArticle();
+});
+
+watch([() => props.id, () => props.isDraftPreview], async () => {
+  closeImageLightbox();
+  await loadArticle();
+});
+
+watch([() => store.state.authState.ready, () => store.state.authState.isadmin], () => {
+  if (props.isDraftPreview) void loadArticle();
+});
 
 watch(
   () => article.value.content,
@@ -306,6 +372,26 @@ watch(
 
 <style scoped>
 @import url("../assets/views/main-container.css");
+
+.draft-preview-notice {
+  margin-bottom: 18px;
+  padding: 10px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--accent-line);
+  border-radius: 10px;
+  background: var(--accent-weak);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 650;
+}
+.draft-preview-notice a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
 
 :global(body) {
   background: radial-gradient(circle at 84% 9%, color-mix(in srgb, var(--accent) 4.5%, transparent), transparent 27rem), var(--app-bg);
@@ -1681,7 +1767,9 @@ watch(
   font-weight: 760;
   line-height: 1;
   letter-spacing: -0.03em;
-  transition: color 180ms ease, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    color 180ms ease,
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .fab-item:hover {
   border-color: var(--accent-line);

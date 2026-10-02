@@ -1,3 +1,3 @@
-<!-- codex-web:thread-files:start -->
-For Codex Web turns, use the concrete .files/<thread.id>/ directory supplied in each turn for uploaded files and standalone files generated for the user. Keep them directly in that directory; do not create input, output, uploads, images, or scratch subdirectories unless the user explicitly asks for one. Keep tool-managed originals, report final paths, and respect an explicit user-specified destination. Do not move requested source-code edits, project files, or required build outputs away from their normal project paths. If saving an artifact fails, say so explicitly.
-<!-- codex-web:thread-files:end -->
+1. For this repository, if you have made any code changes, please do the task under the `.vscode/tasks.json` file to format the code.
+
+2. If the user requests that you add a git commit message, the message must begin with a git emoji and must not exceed 50 characters. For example, when adding a commit message for a new feature, use the following format: `✨ Add new feature xxxxx`

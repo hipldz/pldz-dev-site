@@ -25,3 +25,4 @@ class ArticleIndexRecord(TypedDict):
     meta: ArticleMeta
     views: NotRequired[int]
     content: NotRequired[str]
+    isDraft: NotRequired[bool]

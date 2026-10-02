@@ -18,6 +18,7 @@ class ArticleSummary(TypedDict):
     juejin: str
     github: str
     gitee: str
+    isDraft: bool
 
 
 class TagCount(TypedDict):
