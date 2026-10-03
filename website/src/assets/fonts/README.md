@@ -9,14 +9,18 @@ Manrope (400–800) and Caveat (500–600) retain their variable weights and Lat
 coverage. Chinese text uses the existing system font stack. Both text fonts use
 `font-display: optional`: slow first visits keep the system font for that page,
 without swapping much later and moving the layout. Fast or cached visits can use
-the custom fonts. The loading screen always uses a system font.
+the custom fonts. The loading screen always uses a system font. The local text
+faces are upright; text allows synthesized italics, while icons disable font
+synthesis.
 
 Material Symbols Rounded keeps variable weights (300–600), including the 380
 weight used by the signature. Unused axes are fixed to the standard UI values:
 optical size 24, fill 0, grade 0. It includes names in icon spans (including
-conditional branches), `icon` data properties and `icon` props. `icons.json`
-records that subset. Rerun the script when adding icons and review this list if
-introducing another way to choose icon names.
+conditional branches and multiline closing tags), `icon` data properties, `icon`
+props and literal `content` values in CSS and Vue style blocks (including Toast
+pseudo-elements). Names are filtered against the Material Symbols codepoint list.
+`icons.json` records that subset. Rerun the script when adding icons and review
+this list if introducing another way to choose icon names.
 
 From `website/`, refresh the checked-in assets with Node 22 or newer:
 
@@ -29,6 +33,12 @@ When using an HTTP(S) proxy, use Node 22.21+ and run
 
 This is a maintenance command that needs internet access, not a build step.
 Normal development and builds use the checked-in assets and work offline.
+
+The script downloads all fonts, CSS and licenses before writing assets. It stages
+replacement files and backups next to the assets, then replaces each file by
+rename. Filesystem errors trigger rollback; if restoring a file fails, its backup
+is retained and its path is reported. This protects against handled errors, but
+does not make the entire batch atomic against process termination or power loss.
 
 Sources:
 

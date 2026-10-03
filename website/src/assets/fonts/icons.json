@@ -8,6 +8,7 @@
   "auto_stories",
   "bolt",
   "check",
+  "check_circle",
   "chevron_right",
   "close",
   "code",
@@ -40,6 +41,7 @@
   "open_in_new",
   "pause",
   "person",
+  "photo_camera",
   "play_arrow",
   "play_circle",
   "save",
@@ -47,5 +49,6 @@
   "shield",
   "space_dashboard",
   "terminal",
-  "verified_user"
+  "verified_user",
+  "warning"
 ]
