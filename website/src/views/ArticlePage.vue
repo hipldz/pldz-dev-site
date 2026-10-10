@@ -53,7 +53,8 @@
         <span>其他文章</span>
         <PrevNext :id="article.id" :category="article.meta.category"></PrevNext>
       </div>
-      <div v-if="!isDraft" class="comments-content card-surface">
+      <!-- 暂时隐藏文章评论，保留原有逻辑以便恢复。 -->
+      <div v-if="!isDraft" class="comments-content card-surface" style="display: none">
         <span> 评论留言 </span>
         <CommentForm :article-id="article.id"></CommentForm>
       </div>

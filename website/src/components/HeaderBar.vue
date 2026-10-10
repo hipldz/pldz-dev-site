@@ -16,7 +16,13 @@
 
       <nav class="header-nav" aria-label="主导航">
         <ul ref="navAllRef" class="nav-menu">
-          <li v-for="item in navItems" :key="item.label" :class="['nav-item', { active: isActive(item) }]">
+          <!-- 暂时隐藏白板入口，克隆到移动端菜单时保留隐藏样式。 -->
+          <li
+            v-for="item in navItems"
+            :key="item.label"
+            :class="['nav-item', { active: isActive(item) }]"
+            :style="item.href === '/whiteboard' ? { display: 'none' } : undefined"
+          >
             <a :href="item.href" draggable="true" :aria-current="isActive(item) ? 'page' : undefined" @dragstart="onLinkDragStart">{{ item.label }}</a>
           </li>
           <li v-for="nav in navs" :key="nav.title" class="nav-item nav-item--external">
@@ -41,10 +47,11 @@
           <kbd class="search-trigger__kbd" aria-hidden="true">{{ shortcutLabel }}</kbd>
         </button>
 
-        <button v-if="username" class="user-avatar" type="button" aria-label="打开账号菜单" @click="onToggleLoginForm">
+        <!-- 暂时隐藏登录及账号入口，保留原有逻辑以便恢复。 -->
+        <button v-if="username" class="user-avatar" style="display: none" type="button" aria-label="打开账号菜单" @click="onToggleLoginForm">
           <img :src="avatar || '/api/v1/website/image/avatar/default.jpg'" alt="当前账号头像" />
         </button>
-        <button v-else class="login-register-btn" type="button" aria-label="登录 / 注册" @click="onToggleLoginForm">
+        <button v-else class="login-register-btn" style="display: none" type="button" aria-label="登录 / 注册" @click="onToggleLoginForm">
           <span class="material-symbols-rounded" aria-hidden="true">person</span><span>登录 / 注册</span>
         </button>
       </div>

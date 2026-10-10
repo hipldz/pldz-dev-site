@@ -5,7 +5,8 @@
 
   <HeaderBar :route-name="'白板'" :scroll="true" @toggle-mobile-menu="onToggleMobileMenu" />
 
-  <div class="whiteboard-page">
+  <!-- 暂时隐藏白板内容，直接访问白板地址时也不展示功能。 -->
+  <div class="whiteboard-page" style="display: none">
     <main class="main-container whiteboard-main">
       <section v-reveal class="workspace-masthead" aria-labelledby="whiteboard-title">
         <div class="workspace-masthead__copy" data-reveal-item>

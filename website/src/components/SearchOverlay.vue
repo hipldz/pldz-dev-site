@@ -64,7 +64,7 @@
           <div v-else-if="!loading && combinedResults.length === 0" class="command-empty">
             <span class="empty-spark" aria-hidden="true"></span>
             <strong>没有找到匹配内容</strong>
-            <small>换一个关键词，或者直接输入“白板 / Demo / 文章”。</small>
+            <small>换一个关键词，或者直接输入“Demo / 文章”。</small>
           </div>
 
           <div v-else class="command-results">
@@ -127,13 +127,14 @@ const selectedIndex = ref(0);
 const inputRef = ref(null);
 const bodyRef = ref(null);
 
+// 暂时隐藏白板命令，同时避免键盘选择到隐藏入口。
 const quickCommands = [
   { label: "首页", description: "回到项目与最近内容", href: "/", icon: "home", keywords: "首页 home 项目" },
   { label: "文章 / 教程", description: "浏览专栏、教程与笔记", href: "/articles", icon: "auto_stories", keywords: "文章 教程 专栏 library" },
   { label: "临时白板", description: "暂存文本、图片与截图", href: "/whiteboard", icon: "note_stack", keywords: "白板 临时 缓存 文本 图片" },
   { label: "Live Demos", description: "直接体验可运行项目", href: "/livedemo", icon: "play_circle", keywords: "demo demos live 演示 项目" },
   { label: "GitHub", description: "查看开源项目与代码", href: "https://github.com/hipldz", icon: "code", keywords: "github 开源 代码", external: true },
-];
+].filter((item) => item.href !== "/whiteboard");
 
 const normalizedQuery = computed(() => q.value.trim().toLowerCase());
 const matchingCommands = computed(() => {
