@@ -3,6 +3,16 @@
     "version": "1.0.0",
     "data": [
         {
+            "title": "Codex-WebUI-Lite",
+            "folder": "codex-webui-lite",
+            "url": "/io/codex-webui-lite/",
+            "thumbnail": "/api/v1/website/image/ai-sharing/codex-webui-lite-overview.webp",
+            "previewgif": "/api/v1/website/image/ai-sharing/codex-webui-lite-demo.gif",
+            "sourcelink": "https://github.com/hipldz/codex-webui-lite",
+            "date": "2026-10-13",
+            "description": "轻量化的codex的webui."
+        },
+        {
             "title": "HTML-2-Video",
             "folder": "html-edge-tts-video",
             "url": "/io/html2video/",

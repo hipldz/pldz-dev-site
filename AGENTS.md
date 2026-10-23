@@ -5,3 +5,5 @@
 3. Screenshots of the test cases shall be captured using Playwright and headless Chromium within the host machine’s Python environment.
 
 4. Any test scripts or screenshots shall be stored in the `data/cache/DD-MM-YY` folder.
+
+编写或修改文章及配图前，先阅读并遵循 [文章写作与配图规范](data/articles/.cache/AGENTS.md)。
