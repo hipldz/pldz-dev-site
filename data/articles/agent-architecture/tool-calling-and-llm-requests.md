@@ -14,11 +14,21 @@ tags:
   - Tool Calling
   - OpenAI
   - Agent Runtime
-thumbnail: /api/v1/website/image/agent-architecture/tool-calling-response-lifecycle.webp
+thumbnail: /api/v1/website/image/agent-architecture/tool-calling-and-llm-requests-thumbnail.jpg
 title: Tool Calling 和 LLM Request 是一对一的吗？
 ---
 
 ## 从 Codex WebUI 的工具调用折叠说起
+
+
+<iframe
+  src="https://player.bilibili.com/player.html?isOutside=true&aid=117574947831835&bvid=BV1nN4H6YEQ1&cid=43409738916&p=1"
+  title="B站视频"
+  style="display: block; width: 100%; aspect-ratio: 16 / 9; border: 0;"
+  scrolling="no"
+  allowfullscreen
+></iframe>
+
 
 最近给 Codex 做了 WebUI Lite 这个项目。我自己用的时候发现，工具调用记录很长，而且有些重复；再看 Codex Web 的界面，它会把工具活动折叠起来，像下面这样：
 
