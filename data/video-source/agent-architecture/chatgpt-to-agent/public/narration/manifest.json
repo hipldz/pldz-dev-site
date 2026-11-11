@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "tracks": [
+    {
+      "id": "voice-3018c289-f620-4f8f-88d2-b218c60d1573",
+      "scope": "full",
+      "src": "narration/voice-3018c289-f620-4f8f-88d2-b218c60d1573.wav",
+      "startFrame": 0,
+      "durationInFrames": 5340,
+      "recordedAt": "2026-11-10T17:59:31.548Z"
+    }
+  ]
+}
