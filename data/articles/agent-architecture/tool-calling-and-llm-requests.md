@@ -6,7 +6,7 @@ date: "2026-11-07"
 gitee: ""
 github: ""
 juejin: ""
-serialNo: 1
+serialNo: 99
 status: publish
 summary: 从 Codex WebUI 的工具活动折叠出发，区分 Tool Call、模型 Response、API Request 与 Agent Turn，并结合 OpenAI 文档梳理 Agent Runtime 的分组和追踪方式。
 tags:
@@ -14,7 +14,7 @@ tags:
   - Tool Calling
   - OpenAI
   - Agent Runtime
-thumbnail: /api/v1/website/image/agent-architecture/tool-calling-and-llm-requests-thumbnail.jpg
+thumbnail: /api/v1/website/image/agent-architecture/tool-calling-and-llm-requests-cover.webp
 title: Tool Calling 和 LLM Request 是一对一的吗？
 ---
 
