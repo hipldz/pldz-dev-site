@@ -20,6 +20,17 @@ title: "Workflow 和 Agent"
 
 ## Workflow vs Agent：到底是谁在决定下一步？
 
+
+
+<iframe
+  src="https://player.bilibili.com/player.html?isOutside=true&aid=117609643443282&bvid=BV1QTWB6WEaJ&cid=43577445219&p=1"
+  title="B站视频"
+  style="display: block; width: 100%; aspect-ratio: 16 / 9; border: 0;"
+  scrolling="no"
+  allowfullscreen
+></iframe>
+
+
 ![Workflow 与 Agent 主题插图](/api/v1/website/image/agent-architecture/workflow-vs-agent-figure-01.webp@original)
 
 ## 我个人现在的理解的总结哈

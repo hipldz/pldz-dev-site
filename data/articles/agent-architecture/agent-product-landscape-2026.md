@@ -18,9 +18,18 @@ thumbnail: "/api/v1/website/image/agent-architecture/agent-product-landscape-202
 title: "回头看到2026年的Agent产品"
 ---
 
+
+
+<iframe
+  src="https://player.bilibili.com/player.html?isOutside=true&aid=117609592783780&bvid=BV1vkWB6hEf2&cid=43577245826&p=1"
+  title="B站视频"
+  style="display: block; width: 100%; aspect-ratio: 16 / 9; border: 0;"
+  scrolling="no"
+  allowfullscreen
+></iframe>
+
+
 > 写在 2026 年 11 月 9 日。个人和GPT\-6一起梳理的，不是完整行业年鉴。产品时间按首次公开、正式上线或关键形态转型来记；有些产品会持续改名、合并、迁移，后面也可能继续变。
->
->
 
 ![2026 年 Agent 产品主题插图](/api/v1/website/image/agent-architecture/agent-product-landscape-2026-figure-01.webp@original)
 
